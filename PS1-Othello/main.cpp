@@ -47,19 +47,21 @@ void loadBoard(string fileName){
         while(getline(file, line)){
             if(row < 8){
                 for(int i = 0; i < sizeof(line); i++){
-                    if(isdigit(line[i])){
-                        switch (line[i]){
-                            case '1':
-                                board[row][column] = 'X';
-                                break;
-                            case '2':
-                                board[row][column] = 'O';
-                                break;
-                            default:
-                                board[row][column] = ' ';
-                                break;
-                        }
-                        column++;
+                    switch (line[i]){
+                        case '1':
+                            board[row][column] = 'X';
+                            column++;
+                            break;
+                        case '2':
+                            board[row][column] = 'O';
+                            column++;
+                            break;
+                        case '0':
+                            board[row][column] = ' ';
+                            column++;
+                            break;
+                        default:
+                            break;
                     }   
                 }
                 row++;
