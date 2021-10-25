@@ -1,8 +1,20 @@
 #include <iostream>
 #include<string>
 #include <fstream>
+#include <windows.h>
+
 #define COMPUTER 0
 #define HUMAN 1
+#define BOARDSIZE 8
+
+#define COLORX 12
+#define COLORO 10
+#define COLORRESET 7
+
+#define PLAYERX '#'
+#define PLAYERO 'O'
+
+
 using namespace std;
 
 
@@ -14,29 +26,39 @@ static int playerX;
 static int playerO;
 static bool gameEnd;
 
+HANDLE  hConsole;
+
 void drawBoard(){
     cout<< "      1   2   3   4   5   6   7   8 " << endl;
     cout<< "    ---------------------------------"<<endl;
-    for (int i = 0; i < 8; i++){
+    for (int i = 0; i < BOARDSIZE; i++){
         cout << i + 1 << "   |";
-        for (int j = 0; j < 8; j++){
-            cout <<' '<< board[i][j] << ' '<< "|";
+        for (int j = 0; j < BOARDSIZE; j++){
+            if(board[i][j] == PLAYERX){
+                SetConsoleTextAttribute(hConsole, COLORX);
+            }else if (board[i][j] == PLAYERO){
+                SetConsoleTextAttribute(hConsole, COLORO);
+            }
+
+            cout <<' '<< board[i][j] ;
+            SetConsoleTextAttribute(hConsole, COLORRESET);
+            cout << ' '<< "|";
         }
         cout<< endl<< "    ---------------------------------"<<endl;
     }
 }
 
 void initializeBoard(){
-    for (int i = 0; i < 8; i++){
-        for (int j = 0; j < 8; j++){
+    for (int i = 0; i < BOARDSIZE; i++){
+        for (int j = 0; j < BOARDSIZE; j++){
             board[i][j] = ' ';
         }
     }
 
-    board[3][3] = 'O';
-    board[3][4] = 'X';
-    board[4][3] = 'X';
-    board[4][4] = 'O';
+    board[3][3] = PLAYERO;
+    board[3][4] = PLAYERX;
+    board[4][3] = PLAYERX;
+    board[4][4] = PLAYERO;
 }
 
 // Load board from a given file and play based on it
@@ -55,11 +77,11 @@ void loadBoard(string fileName){
                 for(int i = 0; i < sizeof(line); i++){
                     switch (line[i]){
                         case '1':
-                            board[row][column] = 'X';
+                            board[row][column] = PLAYERX;
                             column++;
                             break;
                         case '2':
-                            board[row][column] = 'O';
+                            board[row][column] = PLAYERO;
                             column++;
                             break;
                         case '0':
@@ -99,6 +121,10 @@ void initialAttempt(){
     string player1Role;
     string player2Role;
     
+    // Initialize console color
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, COLORRESET);
+    
     cout << "Welcome to the Othello paradise!" << endl;
     cout << "Do you want to load the Board from an file?(Y/N)"<< endl;
     cin >> loadFromFile;
@@ -134,12 +160,52 @@ void initialAttempt(){
     drawBoard();
 }
 
+void getValidMoves(){
+    for (int i = 0; i < BOARDSIZE; i++){
+        for (int j = 0; j < BOARDSIZE; j++){
+        }
+    }
+}
+
+void getHumanAction(){
+    getValidMoves();
+}
+
+void getComputerAction(){
+
+}
+
 void gameCoreLoop(){
+    if(playerX == HUMAN){
+        getHumanAction();
+    }else{
+        getComputerAction();
+    }
+
+    drawBoard();
+    
+    if(playerO == HUMAN){
+        getHumanAction();
+    }else{
+        getComputerAction();
+    }
+
+    drawBoard();
+}
+
+void gameSession(){
+    int hi;
+    cin >> hi;
+    // while(true){
+    //     gameCoreLoop();
+    // }
     
 }
 
 int main(){
+    
     initialAttempt();
+    gameSession();
     return 0;
 }
 
