@@ -2,10 +2,12 @@
 #include<string>
 #include <fstream>
 #include <windows.h>
+#include <vector>
 
 #define COMPUTER 0
 #define HUMAN 1
 #define BOARDSIZE 8
+#define INVALID -1
 
 #define COLORX 12
 #define COLORO 10
@@ -19,28 +21,32 @@ using namespace std;
 
 
 // Player 1 is X, player 2 is O
-static char board[8][8];
+static char board[BOARDSIZE][BOARDSIZE];
 static int turn;
 static int timeLimit;
+
 static int playerX;
 static int playerO;
+
 static bool gameEnd;
 
-HANDLE  hConsole;
+HANDLE hConsole;
+int validMoves[64][2];
+int nMoves = 0;
 
 void drawBoard(){
     cout<< "      1   2   3   4   5   6   7   8 " << endl;
     cout<< "    ---------------------------------"<<endl;
-    for (int i = 0; i < BOARDSIZE; i++){
-        cout << i + 1 << "   |";
-        for (int j = 0; j < BOARDSIZE; j++){
-            if(board[i][j] == PLAYERX){
+    for (int row = 0; row < BOARDSIZE; row++){
+        cout << row + 1 << "   |";
+        for (int column = 0; column < BOARDSIZE; column++){
+            if(board[row][column] == PLAYERX){
                 SetConsoleTextAttribute(hConsole, COLORX);
-            }else if (board[i][j] == PLAYERO){
+            }else if (board[row][column] == PLAYERO){
                 SetConsoleTextAttribute(hConsole, COLORO);
             }
 
-            cout <<' '<< board[i][j] ;
+            cout <<' '<< board[row][column] ;
             SetConsoleTextAttribute(hConsole, COLORRESET);
             cout << ' '<< "|";
         }
@@ -49,9 +55,9 @@ void drawBoard(){
 }
 
 void initializeBoard(){
-    for (int i = 0; i < BOARDSIZE; i++){
-        for (int j = 0; j < BOARDSIZE; j++){
-            board[i][j] = ' ';
+    for (int row = 0; row < BOARDSIZE; row++){
+        for (int column = 0; column < BOARDSIZE; column++){
+            board[row][column] = ' ';
         }
     }
 
@@ -160,15 +166,124 @@ void initialAttempt(){
     drawBoard();
 }
 
-void getValidMoves(){
-    for (int i = 0; i < BOARDSIZE; i++){
-        for (int j = 0; j < BOARDSIZE; j++){
+
+void checkHorizontal(char playerSymbol, char oppoSymbol){
+    int tempStart[] = {INVALID,INVALID};
+
+    for (int row = 0; row < BOARDSIZE; row++){
+        for (int column = 0; column < BOARDSIZE; column++){
+            if(board[row][column] == playerSymbol){
+                tempStart[0] = row;
+                tempStart[1] = column;
+            }
+
+            if(tempStart[0] != INVALID && board[row][column] == oppoSymbol){
+                continue;
+            }else if(tempStart[0] != INVALID && board[row][column] == ' '){
+                
+                // empty not directly after the player symbol
+                if(column - tempStart[1] !=1){
+                    
+                    // A valid position is found
+                    validMoves[nMoves][0] = row;
+                    validMoves[nMoves][1] = column;
+
+                    nMoves++;
+                }
+
+                tempStart[0] = INVALID;
+                tempStart[1] = INVALID;
+            }
+        }
+        
+        // Would not be valid for next row
+        tempStart[0] = INVALID;
+        tempStart[1] = INVALID;
+
+    }
+}
+
+// Just the opposite of horizontal
+void checkVertical(char playerSymbol, char oppoSymbol){
+    int tempStart[] = {INVALID,INVALID};
+
+    for (int column = 0; column < BOARDSIZE; column++){
+        for (int row = 0; row < BOARDSIZE; row++){
+            if(board[row][column] == playerSymbol){
+                tempStart[0] = row;
+                tempStart[1] = column;
+            }
+
+            if(tempStart[0] != INVALID && board[row][column] == oppoSymbol){
+                continue;
+            }else if(tempStart[0] != INVALID && board[row][column] == ' '){
+                
+                // empty not directly after the player symbol
+                if(row - tempStart[0] ==1){
+                    tempStart[0] = INVALID;
+                    tempStart[1] = INVALID;
+                }else{
+                    
+                    // A valid position is found
+                    validMoves[nMoves][0] = row;
+                    validMoves[nMoves][1] = column;
+                }
+            }
         }
     }
 }
 
+// check whether valid moves in the up diagonal
+void checkUpDia(char playerSymbol, char oppoSymbol){
+    int tempStart[] = {INVALID,INVALID};
+
+    for (int k; k < BOARDSIZE*2; k++){
+        for (int column = 0; column < k; column++){
+            int row = k - column;
+
+            if(row < BOARDSIZE && column < BOARDSIZE){
+                if(board[row][column] == playerSymbol){
+                    tempStart[0] = row;
+                    tempStart[1] = column;
+                }
+
+                if(tempStart[0] != INVALID && board[row][column] == oppoSymbol){
+                    continue;
+                }else if(tempStart[0] != INVALID && board[row][column] == ' '){
+                    
+                    // empty not directly after the player symbol
+                    if(row - tempStart[0] ==1){
+                        tempStart[0] = INVALID;
+                        tempStart[1] = INVALID;
+                    }else{
+                        
+                        // A valid position is found
+                        validMoves[nMoves][0] = row;
+                        validMoves[nMoves][1] = column;
+                    }
+                }
+            }
+            
+        }
+    }
+}
+
+void getValidMoves(char playerSymbol, char oppoSymbol){
+    checkHorizontal(playerSymbol, oppoSymbol);
+    // checkVertical(playerSymbol, oppoSymbol);
+    // checkUpDia(playerSymbol, oppoSymbol);
+    
+}
+
+void outputMoves(){
+    for(int i; i < nMoves; i++){
+        cout << i+1 << ". ("<< validMoves[i][0] + 1 << "," << validMoves[i][1] + 1 << ")"<< endl;
+    }
+}
+
 void getHumanAction(){
-    getValidMoves();
+    int moveChosen;
+    cin >> moveChosen;
 }
 
 void getComputerAction(){
@@ -176,13 +291,19 @@ void getComputerAction(){
 }
 
 void gameCoreLoop(){
+    
+    getValidMoves(PLAYERX, PLAYERO);
+    
     if(playerX == HUMAN){
+        outputMoves();
         getHumanAction();
     }else{
         getComputerAction();
     }
 
     drawBoard();
+
+    getValidMoves(PLAYERO, PLAYERX);
     
     if(playerO == HUMAN){
         getHumanAction();
@@ -194,11 +315,9 @@ void gameCoreLoop(){
 }
 
 void gameSession(){
-    int hi;
-    cin >> hi;
-    // while(true){
-    //     gameCoreLoop();
-    // }
+    while(true){
+        gameCoreLoop();
+    }
     
 }
 
