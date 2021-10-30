@@ -158,10 +158,10 @@ void initialAttempt(){
     cout << "Player for O? 1.you 2.Computer (1/2)" << endl;
     cin >> player2Role;
     if(player2Role == "1"){
-        playerX = HUMAN;
+        playerO = HUMAN;
     }else{
         // If user entered invalid then playerO is the computer by default
-        playerX = COMPUTER;
+        playerO = COMPUTER;
     }
 
     cout << "Enter the time limit in second for each game round:" << endl;
@@ -175,6 +175,21 @@ void initialAttempt(){
     }
 
     drawBoard();
+}
+
+bool addValidPosition(int row, int column){
+    for(int i = 0; i < nMoves; i++){
+        if(validMoves[i][0] == row && validMoves[i][1]  == column){
+            // A repeated solution
+            return false;            
+        }
+    }
+
+    validMoves[nMoves][0] = row;
+    validMoves[nMoves][1] = column;
+                        
+    nMoves++;
+    return true;
 }
 
 
@@ -203,11 +218,8 @@ void checkHorizontal(char playerSymbol, char oppoSymbol){
                      // empty not directly after the player symbol
                     if(column - tempStart[1] !=1){
                         
-                        // A valid position is found
-                        validMoves[nMoves][0] = row;
-                        validMoves[nMoves][1] = column;
+                        addValidPosition(row, column);
                         
-                        nMoves++;
                     }
                     
                 }
@@ -221,9 +233,7 @@ void checkHorizontal(char playerSymbol, char oppoSymbol){
             }
 
             if(tempEnd[0]!= INVALID && board[row][column] == playerSymbol){
-                validMoves[nMoves][0] = tempEnd[0];
-                validMoves[nMoves][1] = tempEnd[1];
-                nMoves++;
+                addValidPosition(tempEnd[0], tempEnd[1]);
 
                 tempEnd[0] = INVALID;
                 tempEnd[1] = INVALID;
@@ -266,11 +276,7 @@ void checkVertical(char playerSymbol, char oppoSymbol){
                         tempStart[0] = INVALID;
                         tempStart[1] = INVALID;
                     }else{
-                        
-                        // A valid position is found
-                        validMoves[nMoves][0] = row;
-                        validMoves[nMoves][1] = column;
-                        nMoves++;
+                        addValidPosition(row, column);
                     }
                 }
 
@@ -282,9 +288,7 @@ void checkVertical(char playerSymbol, char oppoSymbol){
             }
 
             if(tempEnd[0]!= INVALID && board[row][column] == playerSymbol){
-                validMoves[nMoves][0] = tempEnd[0];
-                validMoves[nMoves][1] = tempEnd[1];
-                nMoves++;
+                addValidPosition(tempEnd[0], tempEnd[1]);
                 
                 tempEnd[0] = INVALID;
                 tempEnd[1] = INVALID;
@@ -344,6 +348,22 @@ void getValidMoves(char playerSymbol, char oppoSymbol){
     
 }
 
+void flipOthers(int position[2], char mSymbol){
+    // Check Flip in the Horizontal
+    if(position[1] -1 > 0){
+        for(int column = position[1] -1; column > 0; column --){
+            cout<< "check" << column<< endl;
+            if(board[position[0]][column] == mSymbol){
+                for( int flipStart = column+1 ; flipStart < position[1]; flipStart++){
+                    board[position[0]][flipStart] = mSymbol;
+                }
+            }
+        }
+    }
+    
+
+}
+
 void outputMoves(){
     for(int i = 0; i < nMoves; i++){
         cout << i+1 << ". ("<< validMoves[i][0] + 1 << "," << validMoves[i][1] + 1 << ")"<< endl;
@@ -358,17 +378,20 @@ void getHumanAction(char symbol){
         cout << "Which Position do you want to place?" << endl;
         cin >> moveChosen;
         if(moveChosen <= nMoves && moveChosen > 0 ){
+            cout << "setting board" << endl;
             board[validMoves[moveChosen-1][0]][validMoves[moveChosen-1][1]] = symbol;
             // Valid input
-            break;
+            return;
         }
     }
 
 }
 
 void getComputerAction(char symbol){
-    outputMoves();
+    // outputMoves();
 }
+
+
 
 void gameCoreLoop(){
     
