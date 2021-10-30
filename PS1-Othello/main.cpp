@@ -360,6 +360,17 @@ void flipOthers(int position[2], char mSymbol){
             }
         }
     }
+
+    if(position[1] + 1 < 7 ){
+        for(int column = position[1] + 1; column < BOARDSIZE; column ++){
+            cout<< "check" << column<< endl;
+            if(board[position[0]][column] == mSymbol){
+                for( int flipStart = column-1 ; flipStart > position[1]; flipStart--){
+                    board[position[0]][flipStart] = mSymbol;
+                }
+            }
+        }
+    }
     
 
 }
@@ -378,9 +389,11 @@ void getHumanAction(char symbol){
         cout << "Which Position do you want to place?" << endl;
         cin >> moveChosen;
         if(moveChosen <= nMoves && moveChosen > 0 ){
-            cout << "setting board" << endl;
-            board[validMoves[moveChosen-1][0]][validMoves[moveChosen-1][1]] = symbol;
-            // Valid input
+            int targetPosi[2] =  {validMoves[moveChosen-1][0], validMoves[moveChosen-1][1]};         
+            board[targetPosi[0]][targetPosi[1]] = symbol;
+
+            flipOthers(targetPosi, symbol);
+            
             return;
         }
     }
