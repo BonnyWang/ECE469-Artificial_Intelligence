@@ -23,7 +23,7 @@ using namespace std;
 // Player 1 is X, player 2 is O
 static char board[BOARDSIZE][BOARDSIZE];
 static int turn;
-static int timeLimit;
+static float timeLimit;
 
 static int playerX;
 static int playerO;
@@ -126,6 +126,7 @@ void initialAttempt(){
     string fileName;
     string player1Role;
     string player2Role;
+    string timeLimitValue;
     
     // Initialize console color
     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -163,6 +164,16 @@ void initialAttempt(){
         playerX = COMPUTER;
     }
 
+    cout << "Enter the time limit in second for each game round:" << endl;
+    cin >> timeLimitValue;
+
+    if(stof(timeLimitValue) > 100 || stoi(timeLimitValue) < 0.0001){
+        cout << "Invalid time limit value, time limit set to 5s by default";
+        timeLimit = 5;
+    }else{
+        timeLimit = stof(timeLimitValue);
+    }
+
     drawBoard();
 }
 
@@ -195,7 +206,7 @@ void checkHorizontal(char playerSymbol, char oppoSymbol){
                         // A valid position is found
                         validMoves[nMoves][0] = row;
                         validMoves[nMoves][1] = column;
-
+                        
                         nMoves++;
                     }
                     
@@ -213,7 +224,7 @@ void checkHorizontal(char playerSymbol, char oppoSymbol){
                 validMoves[nMoves][0] = tempEnd[0];
                 validMoves[nMoves][1] = tempEnd[1];
                 nMoves++;
-                
+
                 tempEnd[0] = INVALID;
                 tempEnd[1] = INVALID;
             }
@@ -326,6 +337,7 @@ void checkUpDia(char playerSymbol, char oppoSymbol){
 }
 
 void getValidMoves(char playerSymbol, char oppoSymbol){
+    nMoves = 0;
     checkHorizontal(playerSymbol, oppoSymbol);
     checkVertical(playerSymbol, oppoSymbol);
     // checkUpDia(playerSymbol, oppoSymbol);
@@ -333,18 +345,29 @@ void getValidMoves(char playerSymbol, char oppoSymbol){
 }
 
 void outputMoves(){
-    for(int i; i < nMoves; i++){
+    for(int i = 0; i < nMoves; i++){
         cout << i+1 << ". ("<< validMoves[i][0] + 1 << "," << validMoves[i][1] + 1 << ")"<< endl;
     }
 }
 
-void getHumanAction(){
+void getHumanAction(char symbol){
+    outputMoves();
+    
     int moveChosen;
-    cin >> moveChosen;
+    while(true){
+        cout << "Which Position do you want to place?" << endl;
+        cin >> moveChosen;
+        if(moveChosen <= nMoves && moveChosen > 0 ){
+            board[validMoves[moveChosen-1][0]][validMoves[moveChosen-1][1]] = symbol;
+            // Valid input
+            break;
+        }
+    }
+
 }
 
-void getComputerAction(){
-
+void getComputerAction(char symbol){
+    outputMoves();
 }
 
 void gameCoreLoop(){
@@ -352,20 +375,19 @@ void gameCoreLoop(){
     getValidMoves(PLAYERX, PLAYERO);
     
     if(playerX == HUMAN){
-        outputMoves();
-        getHumanAction();
+        getHumanAction(PLAYERX);
     }else{
-        getComputerAction();
+        getComputerAction(PLAYERX);
     }
 
     drawBoard();
 
-    getValidMoves(PLAYERO, PLAYERX);
-    
+   
+    getValidMoves(PLAYERO, PLAYERX); 
     if(playerO == HUMAN){
-        getHumanAction();
+        getHumanAction(PLAYERO);
     }else{
-        getComputerAction();
+        getComputerAction(PLAYERO);
     }
 
     drawBoard();
