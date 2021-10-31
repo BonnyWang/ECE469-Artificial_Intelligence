@@ -174,6 +174,7 @@ void initialAttempt(){
         timeLimit = stof(timeLimitValue);
     }
 
+     cout << "TURN for "<< PLAYERX << ":" << endl;
     drawBoard();
 }
 
