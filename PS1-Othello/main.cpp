@@ -349,10 +349,11 @@ void getValidMoves(char playerSymbol, char oppoSymbol){
 }
 
 void flipOthers(int position[2], char mSymbol){
+    // TODO: This function is a bit redundant
+
     // Check Flip in the Horizontal
     if(position[1] -1 > 0){
-        for(int column = position[1] -1; column > 0; column --){
-            cout<< "check" << column<< endl;
+        for(int column = position[1] -1; column >= 0; column --){
             if(board[position[0]][column] == mSymbol){
                 for( int flipStart = column+1 ; flipStart < position[1]; flipStart++){
                     board[position[0]][flipStart] = mSymbol;
@@ -363,10 +364,30 @@ void flipOthers(int position[2], char mSymbol){
 
     if(position[1] + 1 < 7 ){
         for(int column = position[1] + 1; column < BOARDSIZE; column ++){
-            cout<< "check" << column<< endl;
             if(board[position[0]][column] == mSymbol){
                 for( int flipStart = column-1 ; flipStart > position[1]; flipStart--){
                     board[position[0]][flipStart] = mSymbol;
+                }
+            }
+        }
+    }
+
+    // Flip verticals
+    if(position[0] -1 > 0){
+        for(int row = position[0] -1; row >= 0; row --){
+            if(board[row][position[1]] == mSymbol){
+                for( int flipStart = row+1 ; flipStart < position[0]; flipStart++){
+                    board[flipStart][position[1]] = mSymbol;
+                }
+            }
+        }
+    }
+
+    if(position[0] + 1 < 7 ){
+        for(int row = position[0] + 1; row < BOARDSIZE; row ++){
+            if(board[row][position[1]] == mSymbol){
+                for( int flipStart = row-1 ; flipStart > position[0]; flipStart--){
+                    board[flipStart][position[1]] = mSymbol;
                 }
             }
         }
@@ -416,6 +437,7 @@ void gameCoreLoop(){
         getComputerAction(PLAYERX);
     }
 
+    cout << "TURN for "<< PLAYERO << ":" << endl;
     drawBoard();
 
    
@@ -426,6 +448,7 @@ void gameCoreLoop(){
         getComputerAction(PLAYERO);
     }
 
+    cout << "TURN for "<< PLAYERX << ":" << endl;
     drawBoard();
 }
 
