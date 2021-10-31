@@ -454,6 +454,9 @@ void flipOthers(int position[2], char mSymbol){
             for( int flipStart = column+1 ; flipStart < position[1]; flipStart++){
                 board[position[0]][flipStart] = mSymbol;
             }
+            break;
+        }else if(board[position[0]][column] == ' '){
+            break;
         }
     }
 
@@ -463,6 +466,9 @@ void flipOthers(int position[2], char mSymbol){
             for( int flipStart = column-1 ; flipStart > position[1]; flipStart--){
                 board[position[0]][flipStart] = mSymbol;
             }
+            break;
+        }else if(board[position[0]][column] == ' '){
+            break;
         }
     }
     
@@ -473,6 +479,9 @@ void flipOthers(int position[2], char mSymbol){
             for( int flipStart = row+1 ; flipStart < position[0]; flipStart++){
                 board[flipStart][position[1]] = mSymbol;
             }
+            break;
+        }else if(board[row][position[1]] == ' '){
+            break;
         }
     }
 
@@ -482,6 +491,9 @@ void flipOthers(int position[2], char mSymbol){
             for( int flipStart = row-1 ; flipStart > position[0]; flipStart--){
                 board[flipStart][position[1]] = mSymbol;
             }
+            break;
+        }else if(board[row][position[1]] == ' '){
+            break;
         }
     }
 
@@ -491,6 +503,9 @@ void flipOthers(int position[2], char mSymbol){
             for(int flipStart[2] = {row-1, column-1}; flipStart[0] > position[0]; flipStart[0]--, flipStart[1]-- ){
                 board[flipStart[0]][flipStart[1]] = mSymbol;
             }
+            break;
+        }else if(board[row][column] == ' '){
+            break;
         }
     }
 
@@ -500,6 +515,9 @@ void flipOthers(int position[2], char mSymbol){
             for(int flipStart[2] = {row+1, column+1}; flipStart[0] < position[0]; flipStart[0]++, flipStart[1]++ ){
                 board[flipStart[0]][flipStart[1]] = mSymbol;
             }
+            break;
+        }else if(board[row][column] == ' '){
+            break;
         }
     }
 
@@ -509,6 +527,9 @@ void flipOthers(int position[2], char mSymbol){
             for(int flipStart[2] = {row+1, column-1}; flipStart[0] < position[0]; flipStart[0]++, flipStart[1]-- ){
                 board[flipStart[0]][flipStart[1]] = mSymbol;
             }
+            break;
+        }else if(board[row][column] == ' '){
+            break;
         }
     }
 
@@ -517,6 +538,9 @@ void flipOthers(int position[2], char mSymbol){
             for(int flipStart[2] = {row-1, column+1}; flipStart[0] > position[0]; flipStart[0]--, flipStart[1]++ ){
                 board[flipStart[0]][flipStart[1]] = mSymbol;
             }
+            break;
+        }else if(board[row][column] == ' '){
+            break;
         }
     }
     
