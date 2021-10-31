@@ -393,7 +393,7 @@ void checkDownDia(char playerSymbol, char oppoSymbol){
                     tempStart[1] = column;
                 }
            
-                if(row - 1 > 0 && column - 1 > 0 ){
+                if(row - 1 >= 0 && column - 1 >= 0 ){
                     if(board[row][column] == oppoSymbol && board[row-1][column-1] == ' '){
                         tempEnd[0] = row - 1;
                         tempEnd[1] = column - 1;
@@ -525,7 +525,7 @@ void flipOthers(int position[2], char mSymbol){
 
 void outputMoves(){
     for(int i = 0; i < nMoves; i++){
-        cout << i+1 << ". ("<< validMoves[i][0] + 1 << "," << validMoves[i][1] + 1 << ")"<< endl;
+        cout << i+1 << ". ("<< validMoves[i][0]<< "," << validMoves[i][1]<< ")"<< endl;
     }
 }
 
