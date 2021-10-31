@@ -348,7 +348,6 @@ void checkUpDia(char playerSymbol, char oppoSymbol){
                 }
 
                 if(tempEnd[0]!= INVALID && board[row][column] == playerSymbol){
-                    cout << "Temp end found" << endl;
                     addValidPosition(tempEnd[0], tempEnd[1]);
                     
                     tempEnd[0] = INVALID;
