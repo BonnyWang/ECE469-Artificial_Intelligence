@@ -204,7 +204,7 @@ void checkHorizontal(char playerSymbol, char oppoSymbol){
                 tempStart[1] = column;
             }
 
-            if(column -1 > 0){
+            if(column -1 >= 0){
                 if(board[row][column] == oppoSymbol && board[row][column-1] == ' '){
                     tempEnd[0] = row;
                     tempEnd[1] = column-1;
@@ -262,7 +262,7 @@ void checkVertical(char playerSymbol, char oppoSymbol){
                 tempStart[1] = column;
             }
            
-            if(row - 1 > 0){
+            if(row - 1 >= 0){
                 if(board[row][column] == oppoSymbol && board[row-1][column] == ' '){
                     tempEnd[0] = row-1;
                     tempEnd[1] = column;
@@ -272,7 +272,7 @@ void checkVertical(char playerSymbol, char oppoSymbol){
             if(board[row][column] == ' '){
                 if(tempStart[0] != INVALID){
                     // empty not directly after the player symbol
-                    if(row - tempStart[0] ==1){
+                    if(abs(row - tempStart[0]) ==1){
                         tempStart[0] = INVALID;
                         tempStart[1] = INVALID;
                     }else{
@@ -305,38 +305,65 @@ void checkVertical(char playerSymbol, char oppoSymbol){
     }
 }
 
-// check whether valid moves in the up diagonal
+// check whether valid moves in the / diagonal in the matrix
 void checkUpDia(char playerSymbol, char oppoSymbol){
     int tempStart[] = {INVALID,INVALID};
+    int tempEnd[] = {INVALID, INVALID};
 
-    for (int k; k < BOARDSIZE*2; k++){
-        for (int column = 0; column < k; column++){
+    for (int k = 2; k <= 12; k++){
+        int column = k - 7 > 0 ? k - 7 : 0;
+        for (column; column <= k; column++){
             int row = k - column;
 
+            // Might outside the boundary
             if(row < BOARDSIZE && column < BOARDSIZE){
                 if(board[row][column] == playerSymbol){
                     tempStart[0] = row;
                     tempStart[1] = column;
                 }
-
-                if(tempStart[0] != INVALID && board[row][column] == oppoSymbol){
-                    continue;
-                }else if(tempStart[0] != INVALID && board[row][column] == ' '){
-                    
-                    // empty not directly after the player symbol
-                    if(row - tempStart[0] ==1){
-                        tempStart[0] = INVALID;
-                        tempStart[1] = INVALID;
-                    }else{
-                        
-                        // A valid position is found
-                        validMoves[nMoves][0] = row;
-                        validMoves[nMoves][1] = column;
+           
+                if(row + 1 < BOARDSIZE && column - 1 >= 0 ){
+                    if(board[row][column] == oppoSymbol && board[row+1][column-1] == ' '){
+                        tempEnd[0] = row + 1;
+                        tempEnd[1] = column - 1;
                     }
                 }
+                
+                if(board[row][column] == ' '){
+                    if(tempStart[0] != INVALID){
+                        // empty not directly after the player symbol
+                        if(abs(row - tempStart[0]) ==1){
+                            tempStart[0] = INVALID;
+                            tempStart[1] = INVALID;
+                        }else{
+                            addValidPosition(row, column);
+                        }
+                    }
+
+                    tempStart[0] = INVALID;
+                    tempStart[1] = INVALID;
+
+                    tempEnd[0] = INVALID;
+                    tempEnd[1] = INVALID;
+                }
+
+                if(tempEnd[0]!= INVALID && board[row][column] == playerSymbol){
+                    cout << "Temp end found" << endl;
+                    addValidPosition(tempEnd[0], tempEnd[1]);
+                    
+                    tempEnd[0] = INVALID;
+                    tempEnd[1] = INVALID;
+                }
             }
-            
         }
+
+        // Would not be valid for next collumn
+        tempStart[0] = INVALID;
+        tempStart[1] = INVALID;
+
+        tempEnd[0] = INVALID;
+        tempEnd[1] = INVALID;
+            
     }
 }
 
@@ -344,8 +371,7 @@ void getValidMoves(char playerSymbol, char oppoSymbol){
     nMoves = 0;
     checkHorizontal(playerSymbol, oppoSymbol);
     checkVertical(playerSymbol, oppoSymbol);
-    // checkUpDia(playerSymbol, oppoSymbol);
-    
+    checkUpDia(playerSymbol, oppoSymbol);
 }
 
 void flipOthers(int position[2], char mSymbol){
