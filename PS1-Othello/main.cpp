@@ -502,6 +502,23 @@ void flipOthers(int position[2], char mSymbol){
             }
         }
     }
+
+    // Check for / direction
+    for(int row = position[0]-1, column = position[1] + 1; row >= 0 && column < BOARDSIZE; row--, column++){
+        if(board[row][column] == mSymbol){
+            for(int flipStart[2] = {row+1, column-1}; flipStart[0] < position[0]; flipStart[0]++, flipStart[1]-- ){
+                board[flipStart[0]][flipStart[1]] = mSymbol;
+            }
+        }
+    }
+
+    for(int row = position[0] + 1, column = position[1] - 1; row < BOARDSIZE && column >= 0; row++, column--){
+        if(board[row][column] == mSymbol){
+            for(int flipStart[2] = {row-1, column+1}; flipStart[0] > position[0]; flipStart[0]--, flipStart[1]++ ){
+                board[flipStart[0]][flipStart[1]] = mSymbol;
+            }
+        }
+    }
     
 
 }
