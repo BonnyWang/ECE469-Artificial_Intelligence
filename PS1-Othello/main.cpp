@@ -28,7 +28,7 @@ static float timeLimit;
 static int playerX;
 static int playerO;
 
-static bool gameEnd;
+// static bool gameEnd;
 
 HANDLE hConsole;
 int validMoves[64][2];
@@ -438,12 +438,47 @@ void checkDownDia(char playerSymbol, char oppoSymbol){
     }
 }
 
-void getValidMoves(char playerSymbol, char oppoSymbol){
+int calcScore(char symbol){
+    int score = 0;
+
+    for(int row = 0; row < BOARDSIZE; row++){
+        for(int column = 0; column < BOARDSIZE; column++){
+            if(board[row][column] == symbol){
+                score++;
+            }
+        }
+    }
+
+    return score;
+}
+
+
+void gameEnd(char winner){
+    cout << "Game end!" << endl;
+    cout << "The winner is " << winner << "!"<< endl;
+
+    cout << "The score for " << PLAYERX << " is " << endl;
+    cout << "The score for " << PLAYERO << " is " << endl;
+
+    exit(0);
+}
+
+void getValidMoves(char playerSymbol, char oppoSymbol, bool recursive = false){
     nMoves = 0;
+
     checkHorizontal(playerSymbol, oppoSymbol);
     checkVertical(playerSymbol, oppoSymbol);
     checkUpDia(playerSymbol, oppoSymbol);
     checkDownDia(playerSymbol, oppoSymbol);
+
+    if(nMoves == 0 && !recursive) {
+        getValidMoves(oppoSymbol, playerSymbol, true);
+    }else if(nMoves == 0){
+        // No available moves for both Sides
+        calcScore(playerSymbol);
+        // TODO:Need to change
+        gameEnd(playerX);
+    }
 }
 
 void flipOthers(int position[2], char mSymbol){
@@ -558,6 +593,14 @@ void getHumanAction(char symbol){
     outputMoves();
     
     int moveChosen;
+
+    if(nMoves == 0){
+        cout << "There are no available moves. Press any to skip the turn"<< endl;
+        cin >> moveChosen;
+
+        return;
+    }
+
     while(true){
         cout << "Which Position do you want to place?" << endl;
         cin >> moveChosen;
@@ -576,6 +619,8 @@ void getHumanAction(char symbol){
 void getComputerAction(char symbol){
     // outputMoves();
 }
+
+
 
 
 
