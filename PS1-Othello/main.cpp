@@ -22,6 +22,7 @@ using namespace std;
 
 // Player 1 is X, player 2 is O
 static char board[BOARDSIZE][BOARDSIZE];
+static char tempBoard[BOARDSIZE][BOARDSIZE];
 static int turn;
 static float timeLimit;
 
@@ -32,6 +33,8 @@ static int playerO;
 
 HANDLE hConsole;
 int validMoves[64][2];
+static int simValidMoves[64][2];
+static int simNMoves = 0;
 int nMoves = 0;
 
 void drawBoard(){
@@ -178,18 +181,30 @@ void initialAttempt(){
     drawBoard();
 }
 
-bool addValidPosition(int row, int column){
-    for(int i = 0; i < nMoves; i++){
-        if(validMoves[i][0] == row && validMoves[i][1]  == column){
+bool addValidPosition(int row, int column, bool simulation = false){
+    int (*mMoves)[64][2];
+    int *mNMoves;
+
+    if(simulation){
+        mMoves = &simValidMoves;
+        mNMoves = &simNMoves; 
+    }else{
+        mMoves = &validMoves;
+        mNMoves = &nMoves;
+    }
+
+
+    for(int i = 0; i < (*mNMoves); i++){
+        if((*mMoves)[i][0] == row && (*mMoves)[i][1]  == column){
             // A repeated solution
             return false;            
         }
     }
 
-    validMoves[nMoves][0] = row;
-    validMoves[nMoves][1] = column;
+    (*mMoves)[(*mNMoves)][0] = row;
+    (*mMoves)[(*mNMoves)][1] = column;
                         
-    nMoves++;
+    (*mNMoves)++;
     return true;
 }
 
@@ -463,7 +478,7 @@ void gameEnd(char winner){
     exit(0);
 }
 
-void getValidMoves(char playerSymbol, char oppoSymbol, bool recursive = false){
+void getValidMoves(char playerSymbol, char oppoSymbol, bool recursive = false, bool simulation=false){
     nMoves = 0;
 
     checkHorizontal(playerSymbol, oppoSymbol);
@@ -585,7 +600,7 @@ void flipOthers(int position[2], char mSymbol){
 
 void outputMoves(){
     for(int i = 0; i < nMoves; i++){
-        cout << i+1 << ". ("<< validMoves[i][0]<< "," << validMoves[i][1]<< ")"<< endl;
+        cout << i+1 << ". ("<< validMoves[i][0]+1<< "," << validMoves[i][1]+1<< ")"<< endl;
     }
 }
 
@@ -618,11 +633,58 @@ void getHumanAction(char symbol){
 
 void getComputerAction(char symbol){
     // outputMoves();
+    cout << "Time spent on searching:" << endl;
+    cout << "Max depth have been searched:" << endl;
+
+    // TODO: if the time limit caused the next depth limit to be cut off after a partial search,
+    // Display the information as well
+    // If half of the time limit is used up after a search to some specific depth limit
+
 }
 
 
+// int heuristic(){
+//     // If a corner is available?
+
+// }
 
 
+// int* maxValue(char board[][BOARDSIZE],  int alpha, int beta){
+//     // Terminal state is already handled in the getValidMoves function
+//     // TODO is cutoff
+
+//     int utility_Move_Pair[2];
+
+//     int v = -INFINITE;
+//     int a;
+//     int alpha;
+//     int beta;
+//     for (int i = 0; i < nMoves; i++){
+//         int v2, a2;
+//         if(v2 > v){
+//             v = v2;
+//             a = minValue();
+//             alpha = max(alpha, v)
+//         }
+//         if( v > beta){
+//             return v,a;
+//         }
+//     }
+
+//     return v,a;
+    
+// }
+
+// int* minValue(){
+
+// }
+
+// int alphaBetaSearch(){
+
+//     char tempboard[BOARDSIZE][BOARDSIZE];
+//     copy(begin(board), end(board),begin(tempboard));
+
+// }
 
 void gameCoreLoop(){
     
