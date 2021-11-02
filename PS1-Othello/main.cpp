@@ -642,26 +642,48 @@ void getComputerAction(char symbol){
 
 }
 
+// bool isTerminal(){
+
+// }
 
 // int heuristic(){
 //     // If a corner is available?
 
 // }
 
+// char getOppoSymbol(char symbol){
+//     if(symbol != PLAYERX){
+//         return PLAYERX;
+//     }else{
+//         return PLAYERO;
+//     }
+// }
 
-// int* maxValue(char board[][BOARDSIZE],  int alpha, int beta){
+
+// int* maxValue(char(*mBoard)[8][8], int alpha, int beta, char symbol){
 //     // Terminal state is already handled in the getValidMoves function
 //     // TODO is cutoff
 
-//     int utility_Move_Pair[2];
+//     int value_Move_Pair[2];
+    
+//     // From the minValue function to compare
+//     int value_Move_Pair2[2];
+
 
 //     int v = -INFINITE;
 //     int a;
 //     int alpha;
 //     int beta;
-//     for (int i = 0; i < nMoves; i++){
-//         int v2, a2;
-//         if(v2 > v){
+
+
+//     getValidMoves(symbol,getOppoSymbol(symbol),false,true);
+
+//     for (int i = 0; i < simNMoves; i++){
+//         int currentMove[2] = {simValidMoves[i][0], simValidMoves[i][1]};
+//         flipOthers(currentMove,symbol, &tempBoard);
+//         value_Move_Pair2 = copy(begin(minValue(&tempBoard,alpha,beta,symbol);
+
+//         if(value_Move > v){
 //             v = v2;
 //             a = minValue();
 //             alpha = max(alpha, v)
@@ -671,18 +693,25 @@ void getComputerAction(char symbol){
 //         }
 //     }
 
-//     return v,a;
+//     return value_Move_Pair;
     
 // }
 
-// int* minValue(){
-
+// int* minValue(char(*mBoard)[8][8], int alpha, int beta, char symbol){
+//     int value_Move_Pair[2];
+//     return value_Move_Pair;
 // }
 
-// int alphaBetaSearch(){
+// int alphaBetaSearch(char symbol){
+
+//     int moveChosen;
 
 //     char tempboard[BOARDSIZE][BOARDSIZE];
 //     copy(begin(board), end(board),begin(tempboard));
+
+//     moveChosen = maxValue(&tempBoard, -INFINITE, INFINITE, symbol);
+
+//     return moveChosen;
 
 // }
 
