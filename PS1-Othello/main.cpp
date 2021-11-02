@@ -209,7 +209,7 @@ bool addValidPosition(int row, int column, bool simulation = false){
 }
 
 
-void checkHorizontal(char playerSymbol, char oppoSymbol){
+void checkHorizontal(char playerSymbol, char oppoSymbol, bool simulation){
     int tempStart[] = {INVALID,INVALID};
     int tempEnd[] = {INVALID,INVALID};
 
@@ -234,7 +234,7 @@ void checkHorizontal(char playerSymbol, char oppoSymbol){
                      // empty not directly after the player symbol
                     if(column - tempStart[1] !=1){
                         
-                        addValidPosition(row, column);
+                        addValidPosition(row, column, simulation);
                         
                     }
                     
@@ -249,7 +249,7 @@ void checkHorizontal(char playerSymbol, char oppoSymbol){
             }
 
             if(tempEnd[0]!= INVALID && board[row][column] == playerSymbol){
-                addValidPosition(tempEnd[0], tempEnd[1]);
+                addValidPosition(tempEnd[0], tempEnd[1], simulation);
 
                 tempEnd[0] = INVALID;
                 tempEnd[1] = INVALID;
@@ -266,7 +266,7 @@ void checkHorizontal(char playerSymbol, char oppoSymbol){
 }
 
 // Just the opposite of horizontal
-void checkVertical(char playerSymbol, char oppoSymbol){
+void checkVertical(char playerSymbol, char oppoSymbol, bool simulation){
     int tempStart[] = {INVALID,INVALID};
     int tempEnd[] = {INVALID,INVALID};
     
@@ -292,7 +292,7 @@ void checkVertical(char playerSymbol, char oppoSymbol){
                         tempStart[0] = INVALID;
                         tempStart[1] = INVALID;
                     }else{
-                        addValidPosition(row, column);
+                        addValidPosition(row, column, simulation);
                     }
                 }
 
@@ -304,7 +304,7 @@ void checkVertical(char playerSymbol, char oppoSymbol){
             }
 
             if(tempEnd[0]!= INVALID && board[row][column] == playerSymbol){
-                addValidPosition(tempEnd[0], tempEnd[1]);
+                addValidPosition(tempEnd[0], tempEnd[1], simulation);
                 
                 tempEnd[0] = INVALID;
                 tempEnd[1] = INVALID;
@@ -322,7 +322,7 @@ void checkVertical(char playerSymbol, char oppoSymbol){
 }
 
 // check whether valid moves in the / diagonal in the matrix
-void checkUpDia(char playerSymbol, char oppoSymbol){
+void checkUpDia(char playerSymbol, char oppoSymbol, bool simulation){
     int tempStart[] = {INVALID,INVALID};
     int tempEnd[] = {INVALID, INVALID};
 
@@ -352,7 +352,7 @@ void checkUpDia(char playerSymbol, char oppoSymbol){
                             tempStart[0] = INVALID;
                             tempStart[1] = INVALID;
                         }else{
-                            addValidPosition(row, column);
+                            addValidPosition(row, column, simulation);
                         }
                     }
 
@@ -364,7 +364,7 @@ void checkUpDia(char playerSymbol, char oppoSymbol){
                 }
 
                 if(tempEnd[0]!= INVALID && board[row][column] == playerSymbol){
-                    addValidPosition(tempEnd[0], tempEnd[1]);
+                    addValidPosition(tempEnd[0], tempEnd[1], simulation);
                     
                     tempEnd[0] = INVALID;
                     tempEnd[1] = INVALID;
@@ -383,7 +383,7 @@ void checkUpDia(char playerSymbol, char oppoSymbol){
 }
 
 // check whether valid moves in the \ diagonal in the matrix
-void checkDownDia(char playerSymbol, char oppoSymbol){
+void checkDownDia(char playerSymbol, char oppoSymbol, bool simulation){
     int tempStart[] = {INVALID,INVALID};
     int tempEnd[] = {INVALID, INVALID};
 
@@ -423,7 +423,7 @@ void checkDownDia(char playerSymbol, char oppoSymbol){
                             tempStart[0] = INVALID;
                             tempStart[1] = INVALID;
                         }else{
-                            addValidPosition(row, column);
+                            addValidPosition(row, column, simulation);
                         }
                     }
 
@@ -435,7 +435,7 @@ void checkDownDia(char playerSymbol, char oppoSymbol){
                 }
 
                 if(tempEnd[0]!= INVALID && board[row][column] == playerSymbol){
-                    addValidPosition(tempEnd[0], tempEnd[1]);
+                    addValidPosition(tempEnd[0], tempEnd[1], simulation);
                     
                     tempEnd[0] = INVALID;
                     tempEnd[1] = INVALID;
@@ -481,10 +481,10 @@ void gameEnd(char winner){
 void getValidMoves(char playerSymbol, char oppoSymbol, bool recursive = false, bool simulation=false){
     nMoves = 0;
 
-    checkHorizontal(playerSymbol, oppoSymbol);
-    checkVertical(playerSymbol, oppoSymbol);
-    checkUpDia(playerSymbol, oppoSymbol);
-    checkDownDia(playerSymbol, oppoSymbol);
+    checkHorizontal(playerSymbol, oppoSymbol, simulation);
+    checkVertical(playerSymbol, oppoSymbol, simulation);
+    checkUpDia(playerSymbol, oppoSymbol, simulation);
+    checkDownDia(playerSymbol, oppoSymbol, simulation);
 
     if(nMoves == 0 && !recursive) {
         getValidMoves(oppoSymbol, playerSymbol, true);
@@ -496,29 +496,29 @@ void getValidMoves(char playerSymbol, char oppoSymbol, bool recursive = false, b
     }
 }
 
-void flipOthers(int position[2], char mSymbol){
+void flipOthers(int position[2], char mSymbol, char (*mBoard)[8][8]){
     // TODO: This function is a bit redundant
 
     // Check Flip in the Horizontal
     for(int column = position[1] -1; column >= 0; column --){
-        if(board[position[0]][column] == mSymbol){
+        if((*mBoard)[position[0]][column] == mSymbol){
             for( int flipStart = column+1 ; flipStart < position[1]; flipStart++){
                 board[position[0]][flipStart] = mSymbol;
             }
             break;
-        }else if(board[position[0]][column] == ' '){
+        }else if((*mBoard)[position[0]][column] == ' '){
             break;
         }
     }
 
 
     for(int column = position[1] + 1; column < BOARDSIZE; column ++){
-        if(board[position[0]][column] == mSymbol){
+        if((*mBoard)[position[0]][column] == mSymbol){
             for( int flipStart = column-1 ; flipStart > position[1]; flipStart--){
                 board[position[0]][flipStart] = mSymbol;
             }
             break;
-        }else if(board[position[0]][column] == ' '){
+        }else if((*mBoard)[position[0]][column] == ' '){
             break;
         }
     }
@@ -526,71 +526,71 @@ void flipOthers(int position[2], char mSymbol){
 
     // Flip verticals
     for(int row = position[0] -1; row >= 0; row --){
-        if(board[row][position[1]] == mSymbol){
+        if((*mBoard)[row][position[1]] == mSymbol){
             for( int flipStart = row+1 ; flipStart < position[0]; flipStart++){
                 board[flipStart][position[1]] = mSymbol;
             }
             break;
-        }else if(board[row][position[1]] == ' '){
+        }else if((*mBoard)[row][position[1]] == ' '){
             break;
         }
     }
 
 
     for(int row = position[0] + 1; row < BOARDSIZE; row ++){
-        if(board[row][position[1]] == mSymbol){
+        if((*mBoard)[row][position[1]] == mSymbol){
             for( int flipStart = row-1 ; flipStart > position[0]; flipStart--){
                 board[flipStart][position[1]] = mSymbol;
             }
             break;
-        }else if(board[row][position[1]] == ' '){
+        }else if((*mBoard)[row][position[1]] == ' '){
             break;
         }
     }
 
     // Check for \ direction
     for(int row = position[0]+1, column = position[1] + 1; row < BOARDSIZE && column < BOARDSIZE; row++, column++){
-        if(board[row][column] == mSymbol){
+        if((*mBoard)[row][column] == mSymbol){
             for(int flipStart[2] = {row-1, column-1}; flipStart[0] > position[0]; flipStart[0]--, flipStart[1]-- ){
                 board[flipStart[0]][flipStart[1]] = mSymbol;
             }
             break;
-        }else if(board[row][column] == ' '){
+        }else if((*mBoard)[row][column] == ' '){
             break;
         }
     }
 
     
     for(int row = position[0] - 1,column = position[1] - 1 ; row >= 0 && column >= 0; row--, column--){
-        if(board[row][column] == mSymbol){
+        if((*mBoard)[row][column] == mSymbol){
             for(int flipStart[2] = {row+1, column+1}; flipStart[0] < position[0]; flipStart[0]++, flipStart[1]++ ){
                 board[flipStart[0]][flipStart[1]] = mSymbol;
             }
             break;
-        }else if(board[row][column] == ' '){
+        }else if((*mBoard)[row][column] == ' '){
             break;
         }
     }
 
     // Check for / direction
     for(int row = position[0]-1, column = position[1] + 1; row >= 0 && column < BOARDSIZE; row--, column++){
-        if(board[row][column] == mSymbol){
+        if((*mBoard)[row][column] == mSymbol){
             for(int flipStart[2] = {row+1, column-1}; flipStart[0] < position[0]; flipStart[0]++, flipStart[1]-- ){
                 board[flipStart[0]][flipStart[1]] = mSymbol;
             }
             break;
-        }else if(board[row][column] == ' '){
+        }else if((*mBoard)[row][column] == ' '){
             break;
         }
     }
 
     for(int row = position[0] + 1, column = position[1] - 1; row < BOARDSIZE && column >= 0; row++, column--){
-        if(board[row][column] == mSymbol){
+        if((*mBoard)[row][column] == mSymbol){
             for(int flipStart[2] = {row-1, column+1}; flipStart[0] > position[0]; flipStart[0]--, flipStart[1]++ ){
                 board[flipStart[0]][flipStart[1]] = mSymbol;
             }
             break;
-        }else if(board[row][column] == ' '){
+        }else if((*mBoard)[row][column] == ' '){
             break;
         }
     }
@@ -623,7 +623,7 @@ void getHumanAction(char symbol){
             int targetPosi[2] =  {validMoves[moveChosen-1][0], validMoves[moveChosen-1][1]};         
             board[targetPosi[0]][targetPosi[1]] = symbol;
 
-            flipOthers(targetPosi, symbol);
+            flipOthers(targetPosi, symbol, &board);
             
             return;
         }
