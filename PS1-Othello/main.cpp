@@ -3,6 +3,7 @@
 #include <fstream>
 #include <windows.h>
 #include <vector>
+#include <time.h>
 
 #define COMPUTER 0
 #define HUMAN 1
@@ -22,7 +23,6 @@ using namespace std;
 
 // Player 1 is X, player 2 is O
 static char board[BOARDSIZE][BOARDSIZE];
-static char tempBoard[BOARDSIZE][BOARDSIZE];
 static int turn;
 static float timeLimit;
 
@@ -36,6 +36,9 @@ int validMoves[64][2];
 static int simValidMoves[64][2];
 static int simNMoves = 0;
 int nMoves = 0;
+
+time_t startTime;
+time_t endTime;
 
 void drawBoard(){
     cout<< "      1   2   3   4   5   6   7   8 " << endl;
@@ -486,9 +489,9 @@ void getValidMoves(char playerSymbol, char oppoSymbol, bool recursive = false, b
     checkUpDia(board,playerSymbol, oppoSymbol, simulation);
     checkDownDia(board,playerSymbol, oppoSymbol, simulation);
 
-    if(nMoves == 0 && !recursive) {
+    if(nMoves == 0 && !recursive && !simulation) {
         getValidMoves(oppoSymbol, playerSymbol, true);
-    }else if(nMoves == 0){
+    }else if(nMoves == 0 && !simulation){
         // No available moves for both Sides
         calcScore(playerSymbol);
         // TODO:Need to change
@@ -631,8 +634,166 @@ void getHumanAction(char symbol){
 
 }
 
+
+
+bool cutOff(){
+    // time limit or depth limit
+    // When hit the limit, should choose the move dtermined by the deepest complted search
+    time(&endTime);
+    cout << difftime(startTime, endTime) << endl;
+    if( abs(difftime(startTime, endTime)) > 10){
+        return true;
+    }
+
+    return false;
+
+}
+
+// The evaluation function as the heuristic
+int heuristic(char symbol){
+    return calcScore(symbol);
+
+}
+
+char getOppoSymbol(char symbol){
+    if(symbol != PLAYERX){
+        return PLAYERX;
+    }else{
+        return PLAYERO;
+    }
+}
+
+int* minValue(char(*mBoard)[8][8], int alpha, int beta, char symbol);
+
+int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
+    
+    int value_Move_Pair[2];
+    
+    // From the minValue function to compare
+    int* value_Move_Pair2;
+
+    // board represent the current state
+    char tempBoard[8][8];
+    int v = -INFINITE;
+    int a;
+
+    memcpy(tempBoard, (*mBoard), BOARDSIZE*BOARDSIZE*sizeof(*mBoard));
+    for (int row = 0; row < BOARDSIZE; row++){
+        for (int column = 0; column < BOARDSIZE; column++){
+            cout << tempBoard[row][column];
+        }
+        cout << endl;
+    }
+
+    cout << "max" << endl;
+    if(cutOff()){
+        value_Move_Pair[0] = heuristic(symbol);
+        value_Move_Pair[1] = INVALID;
+        return &value_Move_Pair[0];
+    }
+
+    getValidMoves(symbol,getOppoSymbol(symbol),false,true);
+    cout << "max" << endl;
+
+    int mMoves[simNMoves][2];
+    for(int i = 0; i < simNMoves; i++){
+        mMoves[i][0] = simValidMoves[i][0];
+        mMoves[i][1] = simValidMoves[i][1];
+    }
+    
+    cout << "max" << endl;
+
+    for (int i = 0; i < simNMoves; i++){
+        cout << "max" << endl;
+        
+        flipOthers(mMoves[i],symbol, &tempBoard);
+        value_Move_Pair2 = minValue(&tempBoard,alpha,beta,getOppoSymbol(symbol));
+
+        if(value_Move_Pair2[0] > v){
+            v = value_Move_Pair2[0];
+            a = i;
+            alpha = max(alpha, v);
+        }
+        if( v >= beta){
+            value_Move_Pair[0] = v;
+            value_Move_Pair[1] = a;
+            return value_Move_Pair;
+        }
+    }
+
+    return &value_Move_Pair[0];
+    
+}
+
+int* minValue(char(*mBoard)[8][8], int alpha, int beta, char symbol){
+    // Terminal state is already handled in the getValidMoves function
+    // TODO is cutoff
+    cout << "min" << endl;
+
+    int value_Move_Pair[2];
+    
+    // From the minValue function to compare
+    int* value_Move_Pair2;
+
+    char tempBoard[8][8];
+    int v = INFINITE;
+    int a;
+
+    if(cutOff()){
+        value_Move_Pair[0] = heuristic(symbol);
+        value_Move_Pair[1] = INVALID;
+        return &value_Move_Pair[0];
+    }
+
+    memcpy(tempBoard, (*mBoard), BOARDSIZE*BOARDSIZE*sizeof(*mBoard));
+
+    getValidMoves(symbol,getOppoSymbol(symbol),false,true);
+
+    int mMoves[simNMoves][2];
+    for(int i = 0; i < simNMoves; i++){
+        mMoves[i][0] = simValidMoves[i][0];
+        mMoves[i][1] = simValidMoves[i][1];
+    }
+
+    for (int i = 0; i < simNMoves; i++){
+    
+        flipOthers(mMoves[i],symbol, &tempBoard);
+        value_Move_Pair2 = maxValue(&tempBoard,alpha,beta,getOppoSymbol(symbol));
+
+        if(value_Move_Pair2[0] < v){
+            v = value_Move_Pair2[0];
+            a = i;
+            alpha = max(beta, v);
+        }
+        if( v <= alpha){
+            value_Move_Pair[0] = v;
+            value_Move_Pair[1] = a;
+            return value_Move_Pair;
+        }
+    }
+
+    return &value_Move_Pair[0];
+    
+}
+
+int alphaBetaSearch(char symbol){
+
+    int moveChosen;
+
+    char tempboard[BOARDSIZE][BOARDSIZE];
+    memcpy(tempboard,board, BOARDSIZE*BOARDSIZE*sizeof(char));
+
+
+    moveChosen = maxValue(&tempboard, -INFINITE, INFINITE, symbol)[0];
+
+    return moveChosen;
+
+}
+
 void getComputerAction(char symbol){
-    // outputMoves();
+    
+    time(&startTime);
+    alphaBetaSearch(symbol);
     cout << "Time spent on searching:" << endl;
     cout << "Max depth have been searched:" << endl;
 
@@ -642,117 +803,6 @@ void getComputerAction(char symbol){
 
 }
 
-// bool cutOff(){
-//     // time limit or depth limit
-//     // When hit the limit, should choose the move dtermined by the deepest complted search
-
-// }
-
-// // The evaluation function as the heuristic
-// int heuristic(){
-//     // If a corner is available?
-
-// }
-
-// char getOppoSymbol(char symbol){
-//     if(symbol != PLAYERX){
-//         return PLAYERX;
-//     }else{
-//         return PLAYERO;
-//     }
-// }
-
-
-// int* maxValue(char(*mBoard)[8][8], int alpha, int beta, char symbol){
-//     // Terminal state is already handled in the getValidMoves function
-//     // TODO is cutoff
-
-//     int value_Move_Pair[2];
-    
-//     // From the minValue function to compare
-//     int* value_Move_Pair2;
-
-
-//     int v = -INFINITE;
-//     int a;
-//     int alpha;
-//     int beta;
-
-
-//     getValidMoves(symbol,getOppoSymbol(symbol),false,true);
-
-//     for (int i = 0; i < simNMoves; i++){
-//         int currentMove[2] = {simValidMoves[i][0], simValidMoves[i][1]};
-//         flipOthers(currentMove,symbol, &tempBoard);
-//         value_Move_Pair2 = minValue(&tempBoard,alpha,beta,symbol);
-
-//         if(value_Move_Pair2[0] > v){
-//             v = value_Move_Pair2[0];
-//             a = i;
-//             alpha = max(alpha, v)
-//         }
-//         if( v >= beta){
-//             value_Move_Pair[0] = v;
-//             value_Move_Pair[1] = a;
-//             return value_Move_Pair;
-//         }
-//     }
-
-//     return value_Move_Pair;
-    
-// }
-
-// int* minValue(char(*mBoard)[8][8], int alpha, int beta, char symbol){
-//     // Terminal state is already handled in the getValidMoves function
-//     // TODO is cutoff
-
-//     int value_Move_Pair[2];
-    
-//     // From the minValue function to compare
-//     int* value_Move_Pair2;
-
-
-//     int v = INFINITE;
-//     int a;
-//     int alpha;
-//     int beta;
-
-
-//     getValidMoves(symbol,getOppoSymbol(symbol),false,true);
-
-//     for (int i = 0; i < simNMoves; i++){
-//         int currentMove[2] = {simValidMoves[i][0], simValidMoves[i][1]};
-//         flipOthers(currentMove,symbol, &tempBoard);
-//         value_Move_Pair2 = minValue(&tempBoard,alpha,beta,symbol);
-
-//         if(value_Move_Pair2[0] > v){
-//             v = value_Move_Pair2[0];
-//             a = i;
-//             alpha = max(alpha, v)
-//         }
-//         if( v >= beta){
-//             value_Move_Pair[0] = v;
-//             value_Move_Pair[1] = a;
-//             return value_Move_Pair;
-//         }
-//     }
-
-//     return value_Move_Pair;
-    
-// }
-
-// int alphaBetaSearch(char symbol){
-
-//     int moveChosen;
-
-//     char tempboard[BOARDSIZE][BOARDSIZE];
-//     copy(begin(board), end(board),begin(tempboard));
-
-//     moveChosen = maxValue(&tempBoard, -INFINITE, INFINITE, symbol);
-
-//     return moveChosen;
-
-// }
 
 void gameCoreLoop(){
     
