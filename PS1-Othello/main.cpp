@@ -40,6 +40,8 @@ int nMoves = 0;
 time_t startTime;
 time_t endTime;
 
+bool ended = false;
+
 void drawBoard(){
     cout<< "      1   2   3   4   5   6   7   8 " << endl;
     cout<< "    ---------------------------------"<<endl;
@@ -475,10 +477,11 @@ void gameEnd(char winner){
     cout << "Game end!" << endl;
     cout << "The winner is " << winner << "!"<< endl;
 
-    cout << "The score for " << PLAYERX << " is " << endl;
-    cout << "The score for " << PLAYERO << " is " << endl;
+    cout << "The score for " << PLAYERX << " is "<< calcScore(PLAYERX)<< endl;
+    cout << "The score for " << PLAYERO << " is " << calcScore(PLAYERO)<< endl;
 
-    exit(0);
+    ended = true;
+
 }
 
 void getValidMoves(char playerSymbol, char oppoSymbol, bool recursive = false, bool simulation=false){
@@ -807,6 +810,7 @@ void getComputerAction(char symbol){
 void gameCoreLoop(){
     
     getValidMoves(PLAYERX, PLAYERO);
+    if(ended) return;
     
     if(playerX == HUMAN){
         getHumanAction(PLAYERX);
@@ -819,6 +823,8 @@ void gameCoreLoop(){
 
    
     getValidMoves(PLAYERO, PLAYERX); 
+    if(ended) return;
+
     if(playerO == HUMAN){
         getHumanAction(PLAYERO);
     }else{
@@ -830,16 +836,20 @@ void gameCoreLoop(){
 }
 
 void gameSession(){
-    while(true){
+    while(!ended){
         gameCoreLoop();
     }
     
 }
 
 int main(){
-    
+    string toEnd;
+
     initialAttempt();
     gameSession();
+    
+    cout << "Press anything to exit" << endl;
+    cin >> toEnd;
     return 0;
 }
 
