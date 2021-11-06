@@ -732,9 +732,7 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
 }
 
 int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
-    // Terminal state is already handled in the getValidMoves function
-    // TODO is cutoff
-    cout << "min" << endl;
+    cout << "Min Turn Sim" << endl;
 
     int value_Move_Pair[2];
     
@@ -751,7 +749,7 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         return &value_Move_Pair[0];
     }
 
-    memcpy(tempBoard, (*mBoard), BOARDSIZE*BOARDSIZE*sizeof(*mBoard));
+    boardCopy(&tempBoard, mBoard);
 
     getValidMoves(tempBoard, symbol,getOppoSymbol(symbol),false,true);
 
