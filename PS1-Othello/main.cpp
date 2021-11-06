@@ -486,6 +486,7 @@ void gameEnd(char winner){
 
 void getValidMoves(char mBoard[BOARDSIZE][BOARDSIZE], char playerSymbol, char oppoSymbol, bool recursive = false, bool simulation=false){
     nMoves = 0;
+    simNMoves = 0;
     checkHorizontal(mBoard, playerSymbol, oppoSymbol, simulation);
     checkVertical(mBoard,playerSymbol, oppoSymbol, simulation);
     checkUpDia(mBoard,playerSymbol, oppoSymbol, simulation);
@@ -642,8 +643,15 @@ void getHumanAction(char symbol){
 bool cutOff(){
     // time limit or depth limit
     // When hit the limit, should choose the move dtermined by the deepest complted search
+    int tempNmoves = INVALID;
+    if(simNMoves == 0 && tempNmoves == 0){
+        return true;
+    }else if(simNMoves == 0){
+        tempNmoves = 0;
+    }
+
     time(&endTime);
-    cout << difftime(startTime, endTime) << endl;
+    cout << "Time Used for search is : "<< difftime(startTime, endTime) << endl;
     if( abs(difftime(startTime, endTime)) > 10){
         return true;
     }
@@ -676,6 +684,7 @@ void boardCopy(char (*destBoard)[8][8], char (*sourceBoard)[8][8]){
 }
 
 int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
+    cout << "Max Turn Sim" << endl;
     
     int value_Move_Pair[2];
     
@@ -699,21 +708,25 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     if(cutOff()){
         value_Move_Pair[0] = heuristic(symbol);
         value_Move_Pair[1] = INVALID;
-        return &value_Move_Pair[0];
+        return value_Move_Pair;
     }
     getValidMoves(tempBoard, symbol,getOppoSymbol(symbol),false,true);
 
     int mMoves[simNMoves][2];
+    int mNMoves = simNMoves;
     for(int i = 0; i < simNMoves; i++){
         mMoves[i][0] = simValidMoves[i][0];
         mMoves[i][1] = simValidMoves[i][1];
     }
     
 
-    for (int i = 0; i < simNMoves; i++){
-        
-        flipOthers(mMoves[i],symbol, &tempBoard);
-        value_Move_Pair2 = minValue(&tempBoard,alpha,beta,getOppoSymbol(symbol));
+    for (int i = 0; i < mNMoves; i++){
+        char subBoard[8][8];
+        boardCopy(&subBoard, &tempBoard);
+        subBoard[mMoves[i][0]][mMoves[i][1]] = symbol;
+        flipOthers(mMoves[i],symbol, &subBoard);
+
+        value_Move_Pair2 = minValue(&subBoard,alpha,beta,getOppoSymbol(symbol));
 
         if(value_Move_Pair2[0] > v){
             v = value_Move_Pair2[0];
@@ -727,7 +740,7 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         }
     }
 
-    return &value_Move_Pair[0];
+    return value_Move_Pair;
     
 }
 
@@ -744,25 +757,35 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     int a;
 
     if(cutOff()){
-        value_Move_Pair[0] = heuristic(symbol);
+        value_Move_Pair[0] = heuristic(getOppoSymbol(symbol));
         value_Move_Pair[1] = INVALID;
-        return &value_Move_Pair[0];
+        return value_Move_Pair;
     }
 
     boardCopy(&tempBoard, mBoard);
+    for (int row = 0; row < BOARDSIZE; row++){
+        for (int column = 0; column < BOARDSIZE; column++){
+            cout << tempBoard[row][column];
+        }
+        cout << endl;
+    }
 
     getValidMoves(tempBoard, symbol,getOppoSymbol(symbol),false,true);
 
     int mMoves[simNMoves][2];
-    for(int i = 0; i < simNMoves; i++){
+    int mNMoves = simNMoves;
+    for(int i = 0; i < mNMoves; i++){
         mMoves[i][0] = simValidMoves[i][0];
         mMoves[i][1] = simValidMoves[i][1];
     }
 
-    for (int i = 0; i < simNMoves; i++){
-    
-        flipOthers(mMoves[i],symbol, &tempBoard);
-        value_Move_Pair2 = maxValue(&tempBoard,alpha,beta,getOppoSymbol(symbol));
+    for (int i = 0; i < mNMoves; i++){
+        char subBoard[8][8];
+        boardCopy(&subBoard, &tempBoard);
+        subBoard[mMoves[i][0]][mMoves[i][1]] = symbol;
+        flipOthers(mMoves[i],symbol, &subBoard);
+
+        value_Move_Pair2 = maxValue(&subBoard,alpha,beta,getOppoSymbol(symbol));
 
         if(value_Move_Pair2[0] < v){
             v = value_Move_Pair2[0];
@@ -776,7 +799,7 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         }
     }
 
-    return &value_Move_Pair[0];
+    return value_Move_Pair;
     
 }
 
