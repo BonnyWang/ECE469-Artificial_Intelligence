@@ -234,11 +234,11 @@ void checkHorizontal(char mBoard[8][8] ,char playerSymbol, char oppoSymbol, bool
             
             
             if(mBoard[row][column] == ' '){
-                
+
                 if(tempStart[0] != INVALID){
                      // empty not directly after the player symbol
-                    if(column - tempStart[1] !=1){
-                        
+                    if(abs( column - tempStart[1]) !=1){
+
                         addValidPosition(row, column, simulation);
                         
                     }
@@ -484,16 +484,16 @@ void gameEnd(char winner){
 
 }
 
-void getValidMoves(char playerSymbol, char oppoSymbol, bool recursive = false, bool simulation=false){
+void getValidMoves(char mBoard[BOARDSIZE][BOARDSIZE], char playerSymbol, char oppoSymbol, bool recursive = false, bool simulation=false){
     nMoves = 0;
+    checkHorizontal(mBoard, playerSymbol, oppoSymbol, simulation);
+    checkVertical(mBoard,playerSymbol, oppoSymbol, simulation);
+    checkUpDia(mBoard,playerSymbol, oppoSymbol, simulation);
+    checkDownDia(mBoard,playerSymbol, oppoSymbol, simulation);
 
-    checkHorizontal(board, playerSymbol, oppoSymbol, simulation);
-    checkVertical(board,playerSymbol, oppoSymbol, simulation);
-    checkUpDia(board,playerSymbol, oppoSymbol, simulation);
-    checkDownDia(board,playerSymbol, oppoSymbol, simulation);
 
     if(nMoves == 0 && !recursive && !simulation) {
-        getValidMoves(oppoSymbol, playerSymbol, true);
+        getValidMoves(mBoard, oppoSymbol, playerSymbol, true);
     }else if(nMoves == 0 && !simulation){
         // No available moves for both Sides
         calcScore(playerSymbol);
@@ -647,7 +647,7 @@ bool cutOff(){
     if( abs(difftime(startTime, endTime)) > 10){
         return true;
     }
-
+    
     return false;
 
 }
@@ -666,7 +666,14 @@ char getOppoSymbol(char symbol){
     }
 }
 
-int* minValue(char(*mBoard)[8][8], int alpha, int beta, char symbol);
+int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol);
+void boardCopy(char (*destBoard)[8][8], char (*sourceBoard)[8][8]){
+    for(int row = 0; row < BOARDSIZE; row++){
+        for(int column = 0; column < BOARDSIZE; column++){
+            (*destBoard)[row][column] = (*sourceBoard)[row][column];
+        }
+    }
+}
 
 int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     
@@ -680,7 +687,8 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     int v = -INFINITE;
     int a;
 
-    memcpy(tempBoard, (*mBoard), BOARDSIZE*BOARDSIZE*sizeof(*mBoard));
+
+    boardCopy(&tempBoard, mBoard);
     for (int row = 0; row < BOARDSIZE; row++){
         for (int column = 0; column < BOARDSIZE; column++){
             cout << tempBoard[row][column];
@@ -688,15 +696,12 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         cout << endl;
     }
 
-    cout << "max" << endl;
     if(cutOff()){
         value_Move_Pair[0] = heuristic(symbol);
         value_Move_Pair[1] = INVALID;
         return &value_Move_Pair[0];
     }
-
-    getValidMoves(symbol,getOppoSymbol(symbol),false,true);
-    cout << "max" << endl;
+    getValidMoves(tempBoard, symbol,getOppoSymbol(symbol),false,true);
 
     int mMoves[simNMoves][2];
     for(int i = 0; i < simNMoves; i++){
@@ -704,10 +709,8 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         mMoves[i][1] = simValidMoves[i][1];
     }
     
-    cout << "max" << endl;
 
     for (int i = 0; i < simNMoves; i++){
-        cout << "max" << endl;
         
         flipOthers(mMoves[i],symbol, &tempBoard);
         value_Move_Pair2 = minValue(&tempBoard,alpha,beta,getOppoSymbol(symbol));
@@ -728,7 +731,7 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     
 }
 
-int* minValue(char(*mBoard)[8][8], int alpha, int beta, char symbol){
+int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     // Terminal state is already handled in the getValidMoves function
     // TODO is cutoff
     cout << "min" << endl;
@@ -750,7 +753,7 @@ int* minValue(char(*mBoard)[8][8], int alpha, int beta, char symbol){
 
     memcpy(tempBoard, (*mBoard), BOARDSIZE*BOARDSIZE*sizeof(*mBoard));
 
-    getValidMoves(symbol,getOppoSymbol(symbol),false,true);
+    getValidMoves(tempBoard, symbol,getOppoSymbol(symbol),false,true);
 
     int mMoves[simNMoves][2];
     for(int i = 0; i < simNMoves; i++){
@@ -779,13 +782,14 @@ int* minValue(char(*mBoard)[8][8], int alpha, int beta, char symbol){
     
 }
 
+
+
 int alphaBetaSearch(char symbol){
 
     int moveChosen;
 
     char tempboard[BOARDSIZE][BOARDSIZE];
-    memcpy(tempboard,board, BOARDSIZE*BOARDSIZE*sizeof(char));
-
+    boardCopy(&tempboard, &board);
 
     moveChosen = maxValue(&tempboard, -INFINITE, INFINITE, symbol)[0];
 
@@ -796,8 +800,8 @@ int alphaBetaSearch(char symbol){
 void getComputerAction(char symbol){
     
     time(&startTime);
-    alphaBetaSearch(symbol);
     cout << "Time spent on searching:" << endl;
+    alphaBetaSearch(symbol);
     cout << "Max depth have been searched:" << endl;
 
     // TODO: if the time limit caused the next depth limit to be cut off after a partial search,
@@ -809,10 +813,10 @@ void getComputerAction(char symbol){
 
 void gameCoreLoop(){
     
-    getValidMoves(PLAYERX, PLAYERO);
     if(ended) return;
     
     if(playerX == HUMAN){
+        getValidMoves(board, PLAYERX, PLAYERO);
         getHumanAction(PLAYERX);
     }else{
         getComputerAction(PLAYERX);
@@ -822,10 +826,10 @@ void gameCoreLoop(){
     drawBoard();
 
    
-    getValidMoves(PLAYERO, PLAYERX); 
     if(ended) return;
 
     if(playerO == HUMAN){
+        getValidMoves(board, PLAYERO, PLAYERX); 
         getHumanAction(PLAYERO);
     }else{
         getComputerAction(PLAYERO);
@@ -848,7 +852,7 @@ int main(){
     initialAttempt();
     gameSession();
     
-    cout << "Press anything to exit" << endl;
+    cout << "Enter anything to exit" << endl;
     cin >> toEnd;
     return 0;
 }
