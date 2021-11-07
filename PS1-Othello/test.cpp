@@ -1,5 +1,9 @@
 #include <iostream>
 #include<string>
+
+#include <cstdlib>
+#include <ctime> 
+
 using namespace std;
 
 int* hi(){
@@ -11,6 +15,6 @@ int* hi(){
 }
 
 int main(){
-    int i = *(hi()+1);
-    cout << i << endl;
+    srand(time(NULL));
+    cout << rand()%(1+1)<<endl;
 }

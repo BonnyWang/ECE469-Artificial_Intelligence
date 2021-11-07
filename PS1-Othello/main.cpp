@@ -4,6 +4,8 @@
 #include <windows.h>
 #include <vector>
 #include <time.h>
+#include <cstdlib>
+#include <ctime> 
 
 #define COMPUTER 0
 #define HUMAN 1
@@ -42,7 +44,7 @@ time_t startTime;
 time_t endTime;
 double timeUsed;
 int searchDepth = -1;
-int maxDepth = 20;
+int maxDepth = 7;
 
 bool ended = false;
 
@@ -661,50 +663,6 @@ void getHumanAction(char symbol){
 
 }
 
-
-
-bool cutOff(){
-    // time limit or depth limit
-    // When hit the limit, should choose the move dtermined by the deepest complted search
-    
-
-    time(&endTime);
-    timeUsed = abs(difftime(startTime, endTime));
-    if( timeUsed >= timeLimit){
-        return true;
-    }
-
-    if(timeUsed >= timeLimit/2){
-        maxDepth = 10;
-    }
-
-    if(searchDepth > maxDepth){
-        return true;
-    }
-
-    if(simNMoves == 0 && tempNmoves == 0){
-        tempNmoves = INVALID;
-        return true;
-    }else if(simNMoves == 0){
-        tempNmoves = 0;
-    }
-
-    
-    
-    return false;
-
-}
-
-// The evaluation function as the heuristic
-int heuristic(char mBoard[8][8], char symbol){
-    int mScore;
-    
-    mScore = calcScore(mBoard, symbol) - searchDepth;
-
-    return mScore;
-
-}
-
 char getOppoSymbol(char symbol){
     if(symbol != PLAYERX){
         return PLAYERX;
@@ -712,6 +670,90 @@ char getOppoSymbol(char symbol){
         return PLAYERO;
     }
 }
+
+
+bool cutOff(char mBoard[8][8], char symbol){
+
+    time(&endTime);
+    timeUsed = abs(difftime(startTime, endTime));
+    if( timeUsed >= timeLimit){
+        return true;
+    }
+
+    if(timeUsed >= timeLimit/2 && maxDepth > 10){
+        maxDepth = 7;
+    }
+    if(timeUsed >= timeLimit*4/5 && maxDepth > 5){
+        maxDepth = 5;
+    }
+
+    if(searchDepth > maxDepth){
+        if(timeUsed <= timeLimit/4){
+            maxDepth = 10;
+        }else{
+            return true;
+        }
+    }
+
+    if(simNMoves == 0){
+        getValidMoves(mBoard,getOppoSymbol(symbol), symbol,false, true);
+        if(simNMoves == 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    return false;
+
+}
+
+
+
+// The evaluation function as the heuristic
+int heuristic(char mBoard[8][8], char symbol){
+    int mScore;
+    
+    mScore = calcScore(mBoard, symbol) - calcScore(mBoard, getOppoSymbol(symbol));
+
+   for(int column = 0; column < BOARDSIZE; column++){
+       if(mBoard[0][column] == symbol){
+           mScore+=20;
+       }
+       if(mBoard[7][column] == symbol){
+           mScore+=20;
+       }
+   }
+   for(int row = 0; row < BOARDSIZE; row++){
+       if(mBoard[row][0] == symbol){
+           mScore+=20;
+       }
+       if(mBoard[row][7] == symbol){
+           mScore+=20;
+       }
+   }
+
+   if(mBoard[3][3] == symbol){
+           mScore+=10;
+    }
+   if(mBoard[3][4] == symbol){
+           mScore+=10;
+    }
+   if(mBoard[4][4] == symbol){
+           mScore+=10;
+    }
+   if(mBoard[4][3] == symbol){
+           mScore+=10;
+    }
+
+    // Normalize the score so it is not affected too much just by the depth
+    mScore = mScore/(searchDepth+1);
+
+    return mScore;
+
+}
+
+
 
 int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol);
 void boardCopy(char (*destBoard)[8][8], char (*sourceBoard)[8][8]){
@@ -729,14 +771,14 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     int* value_Move_Pair2 = new int[2];
     char tempBoard[8][8];
     int v = -1000;
-    int a;
+    int a = 0;
 
     searchDepth++;
 
     boardCopy(&tempBoard, mBoard);
     getValidMoves(tempBoard, symbol,getOppoSymbol(symbol),false,true);
 
-    if(cutOff()){
+    if(cutOff(tempBoard, symbol)){
         *value_Move_Pair= heuristic(tempBoard, symbol);
         *(value_Move_Pair + 1) = INVALID;
         searchDepth--;
@@ -759,11 +801,23 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         flipOthers(mMoves[i],symbol, &subBoard);
 
         value_Move_Pair2 = minValue(&subBoard,alpha,beta,getOppoSymbol(symbol));
+        if(*value_Move_Pair2 == v){
+            int chose;
+            // Switch to the new value or not
+            chose = rand()%(2);
+
+            // chose between original a or i
+            a = a*chose + (1-chose)*i;
+        }
+        
         if(*value_Move_Pair2 > v){
             v = *value_Move_Pair2;
             a = i;
             alpha = max(alpha, v);
         }
+
+      
+
         if( v >= beta){
             *value_Move_Pair = v;
             *(value_Move_Pair+1) = a;
@@ -794,8 +848,8 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
 
     boardCopy(&tempBoard, mBoard);
 
-    if(cutOff()){
-        *value_Move_Pair = heuristic(tempBoard, symbol);
+    if(cutOff(tempBoard, symbol)){
+        *value_Move_Pair = heuristic(tempBoard, getOppoSymbol(symbol));
         *(value_Move_Pair + 1) = INVALID;
         searchDepth--;
         return value_Move_Pair;
@@ -817,12 +871,23 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         flipOthers(mMoves[i],symbol, &subBoard);
 
         value_Move_Pair2 = maxValue(&subBoard,alpha,beta,getOppoSymbol(symbol));
+        if(*value_Move_Pair2 == v){
+            int chose;
+            // Switch to the new value or not
+            chose = rand()%(2);
+
+            // chose between original a or i
+            a = a*chose + (1-chose)*i;
+        }
+
 
         if(*value_Move_Pair2 < v){
             v = *value_Move_Pair2;
             a = i;
             alpha = max(beta, v);
         }
+
+        
         if( v <= alpha){
             *value_Move_Pair = v;
             *(value_Move_Pair+1) = a;
@@ -845,7 +910,7 @@ int alphaBetaSearch(char symbol){
 
     int moveChosen;
     searchDepth = -1;
-    maxDepth = 20;
+    maxDepth = timeLimit/2 + 7;
 
     char tempboard[BOARDSIZE][BOARDSIZE];
     boardCopy(&tempboard, &board);
@@ -877,6 +942,10 @@ void getComputerAction(char symbol){
     board[targetPosi[0]][targetPosi[1]] = symbol;
 
     flipOthers(targetPosi, symbol, &board);
+
+    if(ended){
+        return;
+    }
 
     cout << "Move Chosen by AI:" << endl;
     cout << moveChosen+1 << endl;
@@ -923,6 +992,9 @@ void gameSession(){
 }
 
 int main(){
+    
+    srand(time(NULL));
+    
     string toEnd;
 
     initialAttempt();
