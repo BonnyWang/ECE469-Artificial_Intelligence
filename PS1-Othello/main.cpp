@@ -521,13 +521,12 @@ void getValidMoves(char mBoard[BOARDSIZE][BOARDSIZE], char playerSymbol, char op
     }else if(nMoves == 0 && !simulation){
         // No available moves for both Sides
         calcScore(board, playerSymbol);
-        // TODO:Need to change
         gameEnd();
     }
 }
 
 void flipOthers(int position[2], char mSymbol, char (*mBoard)[8][8]){
-    // TODO: This function is a bit redundant
+    //This function is a bit redundant
 
     // Check Flip in the Horizontal
     for(int column = position[1] -1; column >= 0; column --){
@@ -980,10 +979,6 @@ void getComputerAction(char symbol){
     cout << "Move Chosen by AI:" << endl;
     cout << moveChosen+1 << endl;
             
-
-    // TODO: if the time limit caused the next depth limit to be cut off after a partial search,
-    // Display the information as well
-    // If half of the time limit is used up after a search to some specific depth limit
 
 }
 
