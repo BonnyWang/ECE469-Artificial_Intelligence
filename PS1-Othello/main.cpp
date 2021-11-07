@@ -727,38 +727,55 @@ int heuristic(char mBoard[8][8], char symbol){
     
     mScore = calcScore(mBoard, symbol) - calcScore(mBoard, getOppoSymbol(symbol));
 
-   for(int column = 0; column < BOARDSIZE; column++){
-       if(mBoard[0][column] == symbol){
-           mScore+=5;
-       }
-       if(mBoard[7][column] == symbol){
-           mScore+=5;
-       }
-   }
-   for(int row = 0; row < BOARDSIZE; row++){
-       if(mBoard[row][0] == symbol){
-           mScore+=5;
-       }
-       if(mBoard[row][7] == symbol){
-           mScore+=5;
-       }
-   }
+    if(maxDepth > 30){
+        for(int column = 0; column < BOARDSIZE; column++){
+            if(mBoard[0][column] == symbol){
+                mScore+=5;
+            }
+            if(mBoard[7][column] == symbol){
+                mScore+=5;
+            }
+        }
+        for(int row = 0; row < BOARDSIZE; row++){
+            if(mBoard[row][0] == symbol){
+                mScore+=5;
+            }
+            if(mBoard[row][7] == symbol){
+                mScore+=5;
+            }
+        }
 
-   if(mBoard[3][3] == symbol){
-           mScore+=3;
+        if(mBoard[3][3] == symbol){
+                mScore+=3;
+        }
+        if(mBoard[3][4] == symbol){
+                mScore+=3;
+        }
+        if(mBoard[4][4] == symbol){
+                mScore+=3;
+        }
+        if(mBoard[4][3] == symbol){
+                mScore+=3;
+        }
     }
-   if(mBoard[3][4] == symbol){
-           mScore+=3;
+
+   
+
+   if(mBoard[7][7] == symbol){
+           mScore+=10;
     }
-   if(mBoard[4][4] == symbol){
-           mScore+=3;
+   if(mBoard[0][0] == symbol){
+           mScore+=10;
     }
-   if(mBoard[4][3] == symbol){
-           mScore+=3;
+   if(mBoard[0][7] == symbol){
+           mScore+=10;
+    }
+   if(mBoard[7][0] == symbol){
+           mScore+=10;
     }
 
     // Normalize the score so it is not affected too much just by the depth
-    mScore = mScore/(searchDepth+1);
+    mScore = mScore/(searchDepth + 1);
 
     return mScore;
 
