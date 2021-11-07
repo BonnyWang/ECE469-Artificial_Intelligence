@@ -45,6 +45,8 @@ time_t endTime;
 double timeUsed;
 int searchDepth = -1;
 int maxDepth = 7;
+int searchedMax = 0;
+bool partialSearched = false;
 
 bool ended = false;
 
@@ -676,20 +678,29 @@ bool cutOff(char mBoard[8][8], char symbol){
 
     time(&endTime);
     timeUsed = abs(difftime(startTime, endTime));
+
+    if(searchDepth > searchedMax){
+        searchedMax = searchDepth;
+    }
+
     if( timeUsed >= timeLimit){
+        if(!partialSearched){
+            cout << "Partial searched to depth:" << searchDepth << endl;
+            partialSearched = true;
+        }
         return true;
     }
 
-    if(timeUsed >= timeLimit/2 && maxDepth > 10){
-        maxDepth = 7;
+    if(timeUsed >= timeLimit/2 && maxDepth > 20){
+        maxDepth = 15;
     }
-    if(timeUsed >= timeLimit*4/5 && maxDepth > 5){
-        maxDepth = 5;
+    if(timeUsed >= timeLimit*4/5 && maxDepth > 10){
+        maxDepth = 10;
     }
 
     if(searchDepth > maxDepth){
-        if(timeUsed <= timeLimit/4){
-            maxDepth = 10;
+        if(timeUsed <= timeLimit/4 && maxDepth < 50){
+            maxDepth = 50;
         }else{
             return true;
         }
@@ -718,32 +729,32 @@ int heuristic(char mBoard[8][8], char symbol){
 
    for(int column = 0; column < BOARDSIZE; column++){
        if(mBoard[0][column] == symbol){
-           mScore+=20;
+           mScore+=5;
        }
        if(mBoard[7][column] == symbol){
-           mScore+=20;
+           mScore+=5;
        }
    }
    for(int row = 0; row < BOARDSIZE; row++){
        if(mBoard[row][0] == symbol){
-           mScore+=20;
+           mScore+=5;
        }
        if(mBoard[row][7] == symbol){
-           mScore+=20;
+           mScore+=5;
        }
    }
 
    if(mBoard[3][3] == symbol){
-           mScore+=10;
+           mScore+=3;
     }
    if(mBoard[3][4] == symbol){
-           mScore+=10;
+           mScore+=3;
     }
    if(mBoard[4][4] == symbol){
-           mScore+=10;
+           mScore+=3;
     }
    if(mBoard[4][3] == symbol){
-           mScore+=10;
+           mScore+=3;
     }
 
     // Normalize the score so it is not affected too much just by the depth
@@ -911,6 +922,8 @@ int alphaBetaSearch(char symbol){
     int moveChosen;
     searchDepth = -1;
     maxDepth = timeLimit/2 + 7;
+    searchedMax = 0;
+    partialSearched = false;
 
     char tempboard[BOARDSIZE][BOARDSIZE];
     boardCopy(&tempboard, &board);
@@ -932,7 +945,7 @@ void getComputerAction(char symbol){
     
     moveChosen = alphaBetaSearch(symbol);
     cout << "Time spent on searching: "  << timeUsed<< endl;
-    cout << "Max depth have been searched: " << searchDepth << endl;
+    cout << "Max depth have been searched: " << searchedMax << endl;
 
     getValidMoves(board,symbol, getOppoSymbol(symbol));
     outputMoves();
