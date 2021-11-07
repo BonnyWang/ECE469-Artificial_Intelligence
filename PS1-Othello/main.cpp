@@ -720,8 +720,8 @@ bool cutOff(char mBoard[8][8], char symbol){
 
 
 
-// The evaluation function as the heuristic
-int heuristic(char mBoard[8][8], char symbol){
+// The evaluation function
+int evaluation(char mBoard[8][8], char symbol){
     int mScore;
     
     mScore = calcScore(mBoard, symbol) - calcScore(mBoard, getOppoSymbol(symbol));
@@ -806,7 +806,7 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     getValidMoves(tempBoard, symbol,getOppoSymbol(symbol),false,true);
 
     if(cutOff(tempBoard, symbol)){
-        *value_Move_Pair= heuristic(tempBoard, symbol);
+        *value_Move_Pair= evaluation(tempBoard, symbol);
         *(value_Move_Pair + 1) = INVALID;
         searchDepth--;
         return value_Move_Pair;
@@ -876,7 +876,7 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     boardCopy(&tempBoard, mBoard);
 
     if(cutOff(tempBoard, symbol)){
-        *value_Move_Pair = heuristic(tempBoard, getOppoSymbol(symbol));
+        *value_Move_Pair = evaluation(tempBoard, getOppoSymbol(symbol));
         *(value_Move_Pair + 1) = INVALID;
         searchDepth--;
         return value_Move_Pair;
