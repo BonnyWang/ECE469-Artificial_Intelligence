@@ -40,6 +40,9 @@ int nMoves = 0;
 
 time_t startTime;
 time_t endTime;
+double timeUsed;
+int searchDepth = -1;
+int maxDepth = 20;
 
 bool ended = false;
 
@@ -474,12 +477,27 @@ int calcScore( char mBoard[8][8],char symbol){
 }
 
 
-void gameEnd(char winner){
+void gameEnd(){
+
+    int playerX_Score = calcScore(board,PLAYERX);
+    int playerO_Score = calcScore(board,PLAYERO);
+    char winner;
+    
     cout << "Game end!" << endl;
-    cout << "The winner is " << winner << "!"<< endl;
+    
+    if(playerX_Score > playerO_Score){
+        winner = PLAYERX;      
+        cout << "The winner is " << winner << "!"<< endl;
+    }else if(playerX_Score != playerO_Score){
+        winner = PLAYERO;
+        cout << "The winner is " << winner << "!"<< endl;
+    }else{
+        cout << "The game is a Draw" << endl;
+    }
+
 
     cout << "The score for " << PLAYERX << " is "<< calcScore(board,PLAYERX)<< endl;
-    cout << "The score for " << PLAYERO << " is " << calcScore(board,PLAYERO)<< endl;
+    cout << "The score for " << PLAYERO << " is " << calcScore(board,PLAYERO)<< endl;    
 
     ended = true;
 
@@ -500,7 +518,7 @@ void getValidMoves(char mBoard[BOARDSIZE][BOARDSIZE], char playerSymbol, char op
         // No available moves for both Sides
         calcScore(board, playerSymbol);
         // TODO:Need to change
-        gameEnd(playerX);
+        gameEnd();
     }
 }
 
@@ -648,9 +666,19 @@ void getHumanAction(char symbol){
 bool cutOff(){
     // time limit or depth limit
     // When hit the limit, should choose the move dtermined by the deepest complted search
+    
 
     time(&endTime);
-    if( abs(difftime(startTime, endTime)) > timeLimit){
+    timeUsed = abs(difftime(startTime, endTime));
+    if( timeUsed >= timeLimit){
+        return true;
+    }
+
+    if(timeUsed >= timeLimit/2){
+        maxDepth = 10;
+    }
+
+    if(searchDepth > maxDepth){
         return true;
     }
 
@@ -669,7 +697,11 @@ bool cutOff(){
 
 // The evaluation function as the heuristic
 int heuristic(char mBoard[8][8], char symbol){
-    return calcScore(mBoard, symbol);
+    int mScore;
+    
+    mScore = calcScore(mBoard, symbol) - searchDepth;
+
+    return mScore;
 
 }
 
@@ -699,12 +731,15 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     int v = -1000;
     int a;
 
+    searchDepth++;
+
     boardCopy(&tempBoard, mBoard);
     getValidMoves(tempBoard, symbol,getOppoSymbol(symbol),false,true);
 
     if(cutOff()){
         *value_Move_Pair= heuristic(tempBoard, symbol);
         *(value_Move_Pair + 1) = INVALID;
+        searchDepth--;
         return value_Move_Pair;
     }
    
@@ -732,6 +767,7 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         if( v >= beta){
             *value_Move_Pair = v;
             *(value_Move_Pair+1) = a;
+            searchDepth--;
             return value_Move_Pair;
         }
     }
@@ -739,6 +775,7 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     *value_Move_Pair = v;
     *(value_Move_Pair+1) = a;
 
+    searchDepth--;
     return value_Move_Pair;
     
 }
@@ -753,11 +790,14 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     int v = 1000;
     int a;
 
+    searchDepth++;
+
     boardCopy(&tempBoard, mBoard);
 
     if(cutOff()){
         *value_Move_Pair = heuristic(tempBoard, symbol);
         *(value_Move_Pair + 1) = INVALID;
+        searchDepth--;
         return value_Move_Pair;
     }
 
@@ -786,6 +826,7 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         if( v <= alpha){
             *value_Move_Pair = v;
             *(value_Move_Pair+1) = a;
+            searchDepth--;
             return value_Move_Pair;
         }
     }
@@ -793,6 +834,7 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     *value_Move_Pair = v;
     *(value_Move_Pair+1) = a;
 
+    searchDepth--;
     return value_Move_Pair;
     
 }
@@ -802,6 +844,8 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
 int alphaBetaSearch(char symbol){
 
     int moveChosen;
+    searchDepth = -1;
+    maxDepth = 20;
 
     char tempboard[BOARDSIZE][BOARDSIZE];
     boardCopy(&tempboard, &board);
@@ -813,12 +857,17 @@ int alphaBetaSearch(char symbol){
 }
 
 void getComputerAction(char symbol){
-    
+
     int moveChosen;
     int targetPosi[2];
     time(&startTime);
-    cout << "Time spent on searching:" << endl;
+    if(ended){
+        return;
+    }
+    
     moveChosen = alphaBetaSearch(symbol);
+    cout << "Time spent on searching: "  << timeUsed<< endl;
+    cout << "Max depth have been searched: " << searchDepth << endl;
 
     getValidMoves(board,symbol, getOppoSymbol(symbol));
     outputMoves();
@@ -829,11 +878,9 @@ void getComputerAction(char symbol){
 
     flipOthers(targetPosi, symbol, &board);
 
-    cout << "Which Position do you want to place?" << endl;
+    cout << "Move Chosen by AI:" << endl;
     cout << moveChosen+1 << endl;
             
-    cout << "Max depth have been searched:" << endl;
-    
 
     // TODO: if the time limit caused the next depth limit to be cut off after a partial search,
     // Display the information as well
@@ -844,7 +891,6 @@ void getComputerAction(char symbol){
 
 void gameCoreLoop(){
     
-    if(ended) return;
     
     if(playerX == HUMAN){
         getValidMoves(board, PLAYERX, PLAYERO);
@@ -864,6 +910,7 @@ void gameCoreLoop(){
         getComputerAction(PLAYERO);
     }
 
+    if(ended) return;
     cout << "TURN for "<< PLAYERX << ":" << endl;
     drawBoard();
 }
