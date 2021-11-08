@@ -748,7 +748,7 @@ int evaluation(char mBoard[8][8], char symbol){
     for(int row = 0; row < BOARDSIZE; row++){
         for(int column = 0; column < BOARDSIZE; column++){
             if(mBoard[row][column] == symbol){
-                mScore += weights[row][column]/5;
+                mScore += weights[row][column];
             }
         }
     }
