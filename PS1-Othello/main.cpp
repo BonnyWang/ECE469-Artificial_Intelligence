@@ -738,10 +738,6 @@ int evaluation(char mBoard[8][8], char symbol){
     moveScore = (calcScore(mBoard, symbol) - calcScore(mBoard, getOppoSymbol(symbol)))/totalMoves;
 
 
-    if(totalMoves > 55){
-        // When towards the end of the game difference have higher weight 
-        moveScore = moveScore*2;
-    }
 
     // Evaluate mobility
     getValidMoves(mBoard,symbol,getOppoSymbol(symbol),false,true);
@@ -755,6 +751,23 @@ int evaluation(char mBoard[8][8], char symbol){
     totalMobility+=simNMoves;
     
     mobilityScore = mobilities/totalMobility;
+
+    // Apply Sweet 16
+    if(totalMobility < 16){
+        for(int row = 2; row < 6; row++){
+            for(int column = 2; column < 6; column++){
+                if(mBoard[row][column] == symbol){
+                    mWeights += 20;
+                    totalWeights += 20;
+                }
+                if(mBoard[row][column] == getOppoSymbol(symbol)){
+                    mWeights -= 20;
+                    totalWeights += 20;
+                }
+            }
+        }
+
+    }
 
     // Using the weight matrix
     for(int row = 0; row < BOARDSIZE; row++){
