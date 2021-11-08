@@ -725,7 +725,7 @@ int evaluation(char mBoard[8][8], char symbol){
     int mScore;
     int totalMoves;
 
-    totalMoves = calcScore(mBoard, symbol) + calcScore(mBoard, getOppoSymbol(symbol) > 55);
+    totalMoves = calcScore(mBoard, symbol) + calcScore(mBoard, getOppoSymbol(symbol));
     
     mScore = calcScore(mBoard, symbol) - calcScore(mBoard, getOppoSymbol(symbol));
 
@@ -738,11 +738,11 @@ int evaluation(char mBoard[8][8], char symbol){
     // Evaluate mobility
     getValidMoves(mBoard,symbol,getOppoSymbol(symbol),false,true);
 
-    mScore += simNMoves*5;
+    mScore += simNMoves*3;
 
     getValidMoves(mBoard,getOppoSymbol(symbol),symbol,false,true);
 
-    mScore -= simNMoves*2;
+    mScore -= simNMoves;
 
     // Using the weight matrix
     for(int row = 0; row < BOARDSIZE; row++){
