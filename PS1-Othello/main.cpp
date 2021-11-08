@@ -49,6 +49,16 @@ bool partialSearched = false;
 
 bool ended = false;
 
+// A weight grid for the board from https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.108.5111&rep=rep1&type=pdf
+int weights[8][8] = {{100,-25,10,5,5,10,-25,100},
+                     {-25,-25,1,1,1,1,-25,-25},
+                     {10,1,5,2,2,5,1,10},
+                     {5,1,2,1,1,2,1,5},
+                     {5,1,2,1,1,2,1,5},
+                     {10,1,5,2,2,5,1,10},
+                     {-25,-25,1,1,1,1,-25,-25},
+                     {100,-25,10,5,5,10,-25,100}};
+
 void drawBoard(){
     cout<< "      1   2   3   4   5   6   7   8 " << endl;
     cout<< "    ---------------------------------"<<endl;
@@ -734,69 +744,14 @@ int evaluation(char mBoard[8][8], char symbol){
 
     mScore -= simNMoves*2;
 
-
-    if(totalMoves < 40){
-        if(mBoard[1][1] == symbol){
-            mScore-=10;
-        }
-        if(mBoard[1][6] == symbol){
-            mScore-=10;
-        }
-        if(mBoard[6][6] == symbol){
-            mScore-=10;
-        }
-        if(mBoard[6][1] == symbol){
-            mScore-=10;
-        }
-    }
-
-    for(int column = 0; column < BOARDSIZE; column++){
-        if(mBoard[0][column] == symbol){
-            mScore+=1;
-        }
-        if(mBoard[7][column] == symbol){
-            mScore+=1;
-        }
-    }
+    // Using the weight matrix
     for(int row = 0; row < BOARDSIZE; row++){
-        if(mBoard[row][0] == symbol){
-            mScore+=1;
+        for(int column = 0; column < BOARDSIZE; column++){
+            if(mBoard[row][column] == symbol){
+                mScore += weights[row][column]/5;
+            }
         }
-        if(mBoard[row][7] == symbol){
-            mScore+=1;
-        }
     }
-
-    if(mBoard[3][3] == symbol){
-            mScore+=1;
-    }
-    if(mBoard[3][4] == symbol){
-            mScore+=1;
-    }
-    if(mBoard[4][4] == symbol){
-            mScore+=1;
-    }
-    if(mBoard[4][3] == symbol){
-            mScore+=1;
-    }
-
-   
-
-   if(mBoard[7][7] == symbol){
-           mScore+=10;
-    }
-   if(mBoard[0][0] == symbol){
-           mScore+=10;
-    }
-   if(mBoard[0][7] == symbol){
-           mScore+=10;
-    }
-   if(mBoard[7][0] == symbol){
-           mScore+=10;
-    }
-
-    // Normalize the score so it is not affected too much just by the depth
-    mScore = mScore;
 
     return mScore;
 
@@ -819,7 +774,7 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol, int depthL
     int* value_Move_Pair = new int[2];
     int* value_Move_Pair2 = new int[2];
     char tempBoard[8][8];
-    int v = -1000;
+    int v = -10000;
     int a = 0;
 
     searchDepth++;
@@ -890,7 +845,7 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol, int depthL
     
 
     char tempBoard[8][8];
-    int v = 1000;
+    int v = 10000;
     int a;
 
     searchDepth++;
@@ -965,7 +920,7 @@ int alphaBetaSearch(char symbol, int depthLimit){
     char tempboard[BOARDSIZE][BOARDSIZE];
     boardCopy(&tempboard, &board);
 
-    moveChosen = *(maxValue(&tempboard, -1000, 1000, symbol, depthLimit)+1);
+    moveChosen = *(maxValue(&tempboard, -10000, 10000, symbol, depthLimit)+1);
 
     return moveChosen;
 
