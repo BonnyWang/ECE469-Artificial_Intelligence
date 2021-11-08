@@ -732,17 +732,20 @@ int evaluation(char mBoard[8][8], char symbol){
 
     if(totalMoves > 55){
         // When towards the end of the game difference have higher weight 
-        mScore = mScore*3;
+        mScore = mScore*5;
     }
 
-    // Evaluate mobility
-    getValidMoves(mBoard,symbol,getOppoSymbol(symbol),false,true);
+    if(totalMoves < 40){
+        // Evaluate mobility
+        getValidMoves(mBoard,symbol,getOppoSymbol(symbol),false,true);
 
-    mScore += simNMoves*3;
+        mScore += simNMoves*3;
 
-    getValidMoves(mBoard,getOppoSymbol(symbol),symbol,false,true);
+        getValidMoves(mBoard,getOppoSymbol(symbol),symbol,false,true);
 
-    mScore -= simNMoves;
+        mScore -= simNMoves;
+    }
+    
 
     // Using the weight matrix
     for(int row = 0; row < BOARDSIZE; row++){
