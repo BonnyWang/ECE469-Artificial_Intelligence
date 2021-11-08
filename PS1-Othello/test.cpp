@@ -16,5 +16,6 @@ int* hi(){
 
 int main(){
     srand(time(NULL));
-    cout << rand()%(1+1)<<endl;
+    cout << float(-3/15)<<endl;
+    return 0;
 }

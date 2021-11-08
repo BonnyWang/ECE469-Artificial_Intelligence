@@ -722,39 +722,59 @@ bool cutOff(char mBoard[8][8], char symbol, int depthLimit){
 
 // The evaluation function
 int evaluation(char mBoard[8][8], char symbol){
-    int mScore;
-    int totalMoves;
+    int mScore = 0;
+    float totalMoves = 0;
+    float totalMobility = 0;
+    float moveScore = 0;
+
+    float mobilities = 0;
+    float mobilityScore = 0;
+    float totalWeights = 0;
+    float mWeights = 0;
+    float weightScore = 0;
 
     totalMoves = calcScore(mBoard, symbol) + calcScore(mBoard, getOppoSymbol(symbol));
     
-    mScore = calcScore(mBoard, symbol) - calcScore(mBoard, getOppoSymbol(symbol));
+    moveScore = (calcScore(mBoard, symbol) - calcScore(mBoard, getOppoSymbol(symbol)))/totalMoves;
 
 
     if(totalMoves > 55){
         // When towards the end of the game difference have higher weight 
-        mScore = mScore*5;
+        moveScore = moveScore*2;
     }
 
-    if(totalMoves < 40){
-        // Evaluate mobility
-        getValidMoves(mBoard,symbol,getOppoSymbol(symbol),false,true);
+    // Evaluate mobility
+    getValidMoves(mBoard,symbol,getOppoSymbol(symbol),false,true);
 
-        mScore += simNMoves*3;
+    mobilities += simNMoves;
+    totalMobility += simNMoves;
 
-        getValidMoves(mBoard,getOppoSymbol(symbol),symbol,false,true);
+    getValidMoves(mBoard,getOppoSymbol(symbol),symbol,false,true);
 
-        mScore -= simNMoves;
-    }
+    mobilities -= simNMoves;
+    totalMobility+=simNMoves;
     
+    mobilityScore = mobilities/totalMobility;
 
     // Using the weight matrix
     for(int row = 0; row < BOARDSIZE; row++){
         for(int column = 0; column < BOARDSIZE; column++){
             if(mBoard[row][column] == symbol){
-                mScore += weights[row][column];
+                mWeights += weights[row][column];
+                totalWeights += abs(weights[row][column]);
+            }
+
+            if(mBoard[row][column] == getOppoSymbol(symbol)){
+                mWeights -= weights[row][column];
+                totalWeights += abs(weights[row][column]);
             }
         }
     }
+
+    
+    weightScore = mWeights/totalWeights;
+
+    mScore = int((moveScore*4 + mobilityScore*6 + weightScore*90)*100);
 
     return mScore;
 
@@ -932,7 +952,7 @@ int alphaBetaSearch(char symbol, int depthLimit){
 void getComputerAction(char symbol){
 
     int tempMoveChosen;
-    int moveChosen;
+    int moveChosen = INVALID;
     int targetPosi[2];
     time(&startTime);
     if(ended){
@@ -954,10 +974,17 @@ void getComputerAction(char symbol){
         }
     }
 
+    getValidMoves(board,symbol, getOppoSymbol(symbol));
+
+    // In case none of the search finishes
+    if(moveChosen = INVALID){
+        moveChosen = rand()%(nMoves);
+    }
+
     cout << "Time spent on searching: "  << timeUsed<< endl;
     cout << "Max depth have been searched: " << searchedMax << endl;
 
-    getValidMoves(board,symbol, getOppoSymbol(symbol));
+    
     outputMoves();
     targetPosi[0] = validMoves[moveChosen][0];
     targetPosi[1] = validMoves[moveChosen][1];
