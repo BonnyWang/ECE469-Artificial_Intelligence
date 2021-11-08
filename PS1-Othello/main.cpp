@@ -698,8 +698,8 @@ bool cutOff(char mBoard[8][8], char symbol){
     }
 
     if(searchDepth > maxDepth){
-        if(timeUsed <= timeLimit/4 && maxDepth < 50){
-            maxDepth = 50;
+        if(timeUsed <= timeLimit/8 && maxDepth < 20){
+            maxDepth = 30;
         }else{
             return true;
         }
@@ -761,16 +761,16 @@ int evaluation(char mBoard[8][8], char symbol){
    
 
    if(mBoard[7][7] == symbol){
-           mScore+=10;
+           mScore+=5;
     }
    if(mBoard[0][0] == symbol){
-           mScore+=10;
+           mScore+=5;
     }
    if(mBoard[0][7] == symbol){
-           mScore+=10;
+           mScore+=5;
     }
    if(mBoard[7][0] == symbol){
-           mScore+=10;
+           mScore+=5;
     }
 
     // Normalize the score so it is not affected too much just by the depth
