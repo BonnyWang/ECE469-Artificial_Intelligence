@@ -524,14 +524,6 @@ void getValidMoves(char mBoard[BOARDSIZE][BOARDSIZE], char playerSymbol, char op
     checkUpDia(mBoard,playerSymbol, oppoSymbol, simulation);
     checkDownDia(mBoard,playerSymbol, oppoSymbol, simulation);
 
-
-    if(nMoves == 0 && !recursive && !simulation) {
-        getValidMoves(mBoard, oppoSymbol, playerSymbol, true);
-    }else if(nMoves == 0 && !simulation){
-        // No available moves for both Sides
-        calcScore(board, playerSymbol);
-        gameEnd();
-    }
 }
 
 void flipOthers(int position[2], char mSymbol, char (*mBoard)[8][8]){
@@ -636,6 +628,15 @@ void flipOthers(int position[2], char mSymbol, char (*mBoard)[8][8]){
 
 }
 
+char getOppoSymbol(char symbol){
+    if(symbol != PLAYERX){
+        return PLAYERX;
+    }else{
+        return PLAYERO;
+    }
+}
+
+
 void outputMoves(){
     for(int i = 0; i < nMoves; i++){
         cout << i+1 << ". ("<< validMoves[i][0]+1<< "," << validMoves[i][1]+1<< ")"<< endl;
@@ -651,11 +652,19 @@ void getHumanAction(char symbol){
         return;
     }
 
-    if(nMoves == 0){
-        cout << "There are no available moves. Press any to skip the turn"<< endl;
-        cin >> moveChosen;
 
-        return;
+    if(nMoves == 0){
+        getValidMoves(board,getOppoSymbol(symbol),symbol);
+        if(nMoves == 0){
+            gameEnd();
+            return;
+        }else{
+            // Still available moves for opponents, reset the moves to the previous state
+            cout << "There are no available moves. Press any to skip the turn"<< endl;
+            cin >> moveChosen;
+
+            return;
+        }
     }
 
     while(true){
@@ -673,13 +682,6 @@ void getHumanAction(char symbol){
 
 }
 
-char getOppoSymbol(char symbol){
-    if(symbol != PLAYERX){
-        return PLAYERX;
-    }else{
-        return PLAYERO;
-    }
-}
 
 
 bool cutOff(char mBoard[8][8], char symbol, int depthLimit){
@@ -971,6 +973,19 @@ void getComputerAction(char symbol){
     if(ended){
         return;
     }
+
+    getValidMoves(board,symbol, getOppoSymbol(symbol));
+
+    if(nMoves == 0){
+        getValidMoves(board,getOppoSymbol(symbol), symbol);
+        
+        if(nMoves == 0){
+            gameEnd();
+            return;
+        }
+        cout << "No move available for AI!" <<endl;
+        return;
+    }
     
     for(int depthLimit = 7; depthLimit < 50; depthLimit++){
         time(&endTime);
@@ -989,8 +1004,9 @@ void getComputerAction(char symbol){
 
     getValidMoves(board,symbol, getOppoSymbol(symbol));
 
+
     // In case none of the search finishes
-    if(moveChosen = INVALID){
+    if(moveChosen == INVALID){
         moveChosen = rand()%(nMoves);
     }
 
