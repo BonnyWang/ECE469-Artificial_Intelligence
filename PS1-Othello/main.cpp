@@ -44,7 +44,6 @@ time_t startTime;
 time_t endTime;
 double timeUsed;
 int searchDepth = -1;
-int maxDepth = 7;
 int searchedMax = 0;
 bool partialSearched = false;
 
@@ -673,7 +672,7 @@ char getOppoSymbol(char symbol){
 }
 
 
-bool cutOff(char mBoard[8][8], char symbol){
+bool cutOff(char mBoard[8][8], char symbol, int depthLimit){
 
     time(&endTime);
     timeUsed = abs(difftime(startTime, endTime));
@@ -684,27 +683,18 @@ bool cutOff(char mBoard[8][8], char symbol){
 
     if( timeUsed >= timeLimit){
         if(!partialSearched){
-            cout << "Partial searched to depth:" << searchDepth << endl;
+            cout << "Partial searched to depth:" << searchedMax << endl;
             partialSearched = true;
         }
         return true;
     }
 
-    if(timeUsed >= timeLimit/2 && maxDepth > 20){
-        maxDepth = 15;
-    }
-    if(timeUsed >= timeLimit*4/5 && maxDepth > 10){
-        maxDepth = 10;
+
+    if(searchDepth > depthLimit){
+        return true;
     }
 
-    if(searchDepth > maxDepth){
-        if(timeUsed <= timeLimit/8 && maxDepth < 20){
-            maxDepth = 30;
-        }else{
-            return true;
-        }
-    }
-
+    // When the terminal state is reached
     if(simNMoves == 0){
         getValidMoves(mBoard,getOppoSymbol(symbol), symbol,false, true);
         if(simNMoves == 0){
@@ -723,58 +713,90 @@ bool cutOff(char mBoard[8][8], char symbol){
 // The evaluation function
 int evaluation(char mBoard[8][8], char symbol){
     int mScore;
+    int totalMoves;
+
+    totalMoves = calcScore(mBoard, symbol) + calcScore(mBoard, getOppoSymbol(symbol) > 55);
     
     mScore = calcScore(mBoard, symbol) - calcScore(mBoard, getOppoSymbol(symbol));
 
-    if(maxDepth > 30){
-        for(int column = 0; column < BOARDSIZE; column++){
-            if(mBoard[0][column] == symbol){
-                mScore+=5;
-            }
-            if(mBoard[7][column] == symbol){
-                mScore+=5;
-            }
-        }
-        for(int row = 0; row < BOARDSIZE; row++){
-            if(mBoard[row][0] == symbol){
-                mScore+=5;
-            }
-            if(mBoard[row][7] == symbol){
-                mScore+=5;
-            }
-        }
 
-        if(mBoard[3][3] == symbol){
-                mScore+=3;
+    if(totalMoves > 55){
+        // When towards the end of the game difference have higher weight 
+        mScore = mScore*3;
+    }
+
+    // Evaluate mobility
+    getValidMoves(mBoard,symbol,getOppoSymbol(symbol),false,true);
+
+    mScore += simNMoves*5;
+
+    getValidMoves(mBoard,getOppoSymbol(symbol),symbol,false,true);
+
+    mScore -= simNMoves*2;
+
+
+    if(totalMoves < 40){
+        if(mBoard[1][1] == symbol){
+            mScore-=10;
         }
-        if(mBoard[3][4] == symbol){
-                mScore+=3;
+        if(mBoard[1][6] == symbol){
+            mScore-=10;
         }
-        if(mBoard[4][4] == symbol){
-                mScore+=3;
+        if(mBoard[6][6] == symbol){
+            mScore-=10;
         }
-        if(mBoard[4][3] == symbol){
-                mScore+=3;
+        if(mBoard[6][1] == symbol){
+            mScore-=10;
         }
+    }
+
+    for(int column = 0; column < BOARDSIZE; column++){
+        if(mBoard[0][column] == symbol){
+            mScore+=1;
+        }
+        if(mBoard[7][column] == symbol){
+            mScore+=1;
+        }
+    }
+    for(int row = 0; row < BOARDSIZE; row++){
+        if(mBoard[row][0] == symbol){
+            mScore+=1;
+        }
+        if(mBoard[row][7] == symbol){
+            mScore+=1;
+        }
+    }
+
+    if(mBoard[3][3] == symbol){
+            mScore+=1;
+    }
+    if(mBoard[3][4] == symbol){
+            mScore+=1;
+    }
+    if(mBoard[4][4] == symbol){
+            mScore+=1;
+    }
+    if(mBoard[4][3] == symbol){
+            mScore+=1;
     }
 
    
 
    if(mBoard[7][7] == symbol){
-           mScore+=5;
+           mScore+=10;
     }
    if(mBoard[0][0] == symbol){
-           mScore+=5;
+           mScore+=10;
     }
    if(mBoard[0][7] == symbol){
-           mScore+=5;
+           mScore+=10;
     }
    if(mBoard[7][0] == symbol){
-           mScore+=5;
+           mScore+=10;
     }
 
     // Normalize the score so it is not affected too much just by the depth
-    mScore = mScore/(searchDepth + 1);
+    mScore = mScore;
 
     return mScore;
 
@@ -782,7 +804,7 @@ int evaluation(char mBoard[8][8], char symbol){
 
 
 
-int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol);
+int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol, int depthLimit);
 void boardCopy(char (*destBoard)[8][8], char (*sourceBoard)[8][8]){
     for(int row = 0; row < BOARDSIZE; row++){
         for(int column = 0; column < BOARDSIZE; column++){
@@ -791,7 +813,7 @@ void boardCopy(char (*destBoard)[8][8], char (*sourceBoard)[8][8]){
     }
 }
 
-int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){    
+int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol, int depthLimit){    
 
     // board represent the current state
     int* value_Move_Pair = new int[2];
@@ -805,7 +827,7 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     boardCopy(&tempBoard, mBoard);
     getValidMoves(tempBoard, symbol,getOppoSymbol(symbol),false,true);
 
-    if(cutOff(tempBoard, symbol)){
+    if(cutOff(tempBoard, symbol, depthLimit)){
         *value_Move_Pair= evaluation(tempBoard, symbol);
         *(value_Move_Pair + 1) = INVALID;
         searchDepth--;
@@ -827,7 +849,7 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         subBoard[mMoves[i][0]][mMoves[i][1]] = symbol;
         flipOthers(mMoves[i],symbol, &subBoard);
 
-        value_Move_Pair2 = minValue(&subBoard,alpha,beta,getOppoSymbol(symbol));
+        value_Move_Pair2 = minValue(&subBoard,alpha,beta,getOppoSymbol(symbol),depthLimit);
         if(*value_Move_Pair2 == v){
             int chose;
             // Switch to the new value or not
@@ -861,7 +883,7 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
     
 }
 
-int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
+int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol, int depthLimit){
 
     int* value_Move_Pair = new int[2];
     int* value_Move_Pair2 = new int[2];
@@ -875,7 +897,7 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
 
     boardCopy(&tempBoard, mBoard);
 
-    if(cutOff(tempBoard, symbol)){
+    if(cutOff(tempBoard, symbol, depthLimit)){
         *value_Move_Pair = evaluation(tempBoard, getOppoSymbol(symbol));
         *(value_Move_Pair + 1) = INVALID;
         searchDepth--;
@@ -897,7 +919,7 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
         subBoard[mMoves[i][0]][mMoves[i][1]] = symbol;
         flipOthers(mMoves[i],symbol, &subBoard);
 
-        value_Move_Pair2 = maxValue(&subBoard,alpha,beta,getOppoSymbol(symbol));
+        value_Move_Pair2 = maxValue(&subBoard,alpha,beta,getOppoSymbol(symbol), depthLimit);
         if(*value_Move_Pair2 == v){
             int chose;
             // Switch to the new value or not
@@ -933,18 +955,17 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol){
 
 
 
-int alphaBetaSearch(char symbol){
+int alphaBetaSearch(char symbol, int depthLimit){
 
     int moveChosen;
     searchDepth = -1;
-    maxDepth = timeLimit/2 + 7;
     searchedMax = 0;
     partialSearched = false;
 
     char tempboard[BOARDSIZE][BOARDSIZE];
     boardCopy(&tempboard, &board);
 
-    moveChosen = *(maxValue(&tempboard, -1000, 1000, symbol)+1);
+    moveChosen = *(maxValue(&tempboard, -1000, 1000, symbol, depthLimit)+1);
 
     return moveChosen;
 
@@ -952,6 +973,7 @@ int alphaBetaSearch(char symbol){
 
 void getComputerAction(char symbol){
 
+    int tempMoveChosen;
     int moveChosen;
     int targetPosi[2];
     time(&startTime);
@@ -959,7 +981,21 @@ void getComputerAction(char symbol){
         return;
     }
     
-    moveChosen = alphaBetaSearch(symbol);
+    for(int depthLimit = 7; depthLimit < 50; depthLimit++){
+        time(&endTime);
+        timeUsed = abs(difftime(startTime, endTime));
+        if(timeUsed >= timeLimit){
+            break;
+        }
+        
+        tempMoveChosen = alphaBetaSearch(symbol, depthLimit);
+        if(!partialSearched){
+            moveChosen = tempMoveChosen;
+        }else{
+            searchedMax = searchedMax -1;
+        }
+    }
+
     cout << "Time spent on searching: "  << timeUsed<< endl;
     cout << "Max depth have been searched: " << searchedMax << endl;
 
