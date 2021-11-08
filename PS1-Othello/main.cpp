@@ -754,42 +754,22 @@ int evaluation(char mBoard[8][8], char symbol){
     
     mobilityScore = mobilities/totalMobility;
 
-    // Apply Sweet 16
-    if(totalMobility < 16){
-        for(int row = 2; row < 6; row++){
-            for(int column = 2; column < 6; column++){
-                if(mBoard[row][column] == symbol){
-                    mWeights += 20;
-                    totalWeights += 20;
-                }
-                if(mBoard[row][column] == getOppoSymbol(symbol)){
-                    mWeights -= 20;
-                    totalWeights += 20;
-                }
-            }
-        }
-
-    }
 
     // Using the weight matrix
     for(int row = 0; row < BOARDSIZE; row++){
         for(int column = 0; column < BOARDSIZE; column++){
             if(mBoard[row][column] == symbol){
                 mWeights += weights[row][column];
-                totalWeights += abs(weights[row][column]);
             }
 
             if(mBoard[row][column] == getOppoSymbol(symbol)){
                 mWeights -= weights[row][column];
-                totalWeights += abs(weights[row][column]);
             }
         }
     }
 
-    
-    weightScore = mWeights/totalWeights;
 
-    mScore = int((moveScore*4 + mobilityScore*6 + weightScore*90)*100);
+    mScore = int(moveScore*10 + mobilityScore*10) + mWeights*10;
 
     return mScore;
 
@@ -857,7 +837,6 @@ int* maxValue(char (*mBoard)[8][8], int alpha, int beta, char symbol, int depthL
             a = i;
             alpha = max(alpha, v);
         }
-
       
 
         if( v >= beta){
@@ -987,7 +966,7 @@ void getComputerAction(char symbol){
         return;
     }
     
-    for(int depthLimit = 7; depthLimit < 50; depthLimit++){
+    for(int depthLimit = 5; depthLimit < 20; depthLimit++){
         time(&endTime);
         timeUsed = abs(difftime(startTime, endTime));
         if(timeUsed >= timeLimit){
