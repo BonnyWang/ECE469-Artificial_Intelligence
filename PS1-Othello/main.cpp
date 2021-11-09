@@ -726,12 +726,10 @@ bool cutOff(char mBoard[8][8], char symbol, int depthLimit){
 int evaluation(char mBoard[8][8], char symbol){
     int mScore = 0;
     float totalMoves = 0;
-    float totalMobility = 0;
     float moveScore = 0;
 
     float mobilities = 0;
     float mobilityScore = 0;
-    float totalWeights = 0;
     float mWeights = 0;
     float weightScore = 0;
 
@@ -745,14 +743,11 @@ int evaluation(char mBoard[8][8], char symbol){
     getValidMoves(mBoard,symbol,getOppoSymbol(symbol),false,true);
 
     mobilities += simNMoves;
-    totalMobility += simNMoves;
 
     getValidMoves(mBoard,getOppoSymbol(symbol),symbol,false,true);
 
     mobilities -= simNMoves;
-    totalMobility+=simNMoves;
     
-    mobilityScore = mobilities/totalMobility;
 
 
     // Using the weight matrix
@@ -765,11 +760,12 @@ int evaluation(char mBoard[8][8], char symbol){
             if(mBoard[row][column] == getOppoSymbol(symbol)){
                 mWeights -= weights[row][column];
             }
+
         }
     }
 
 
-    mScore = int(moveScore*10 + mobilityScore*10) + mWeights*10;
+    mScore = int((moveScore*10 + mobilities+ mWeights*5));
 
     return mScore;
 
@@ -905,7 +901,7 @@ int* minValue(char (*mBoard)[8][8], int alpha, int beta, char symbol, int depthL
         if(*value_Move_Pair2 < v){
             v = *value_Move_Pair2;
             a = i;
-            alpha = max(beta, v);
+            beta = min(beta, v);
         }
 
         
