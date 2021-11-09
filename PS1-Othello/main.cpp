@@ -50,14 +50,14 @@ bool partialSearched = false;
 bool ended = false;
 
 // A weight grid for the board from https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.108.5111&rep=rep1&type=pdf
-int weights[8][8] = {{100,-25,10,5,5,10,-25,100},
+int weights[8][8] = {{200,-25,10,5,5,10,-25,200},
                      {-25,-25,1,1,1,1,-25,-25},
                      {10,1,5,2,2,5,1,10},
                      {5,1,2,1,1,2,1,5},
                      {5,1,2,1,1,2,1,5},
                      {10,1,5,2,2,5,1,10},
                      {-25,-25,1,1,1,1,-25,-25},
-                     {100,-25,10,5,5,10,-25,100}};
+                     {200,-25,10,5,5,10,-25,200}};
 
 void drawBoard(){
     cout<< "      1   2   3   4   5   6   7   8 " << endl;
