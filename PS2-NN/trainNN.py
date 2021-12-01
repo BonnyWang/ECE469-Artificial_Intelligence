@@ -9,6 +9,8 @@ nHiddenNodes = 0;
 initialFile = "";
 trainFile = "";
 outputFile = "";
+learningRate = 0.1;
+epoch = 0;
 
 biasValue = -1;
 
@@ -25,20 +27,20 @@ class NNetwork:
   
 mNN = NNetwork();
 
+def sigmoid(x):
+    return 1/(1 + np.exp(-x));
 
-def backPropagate():
+
+# Calculate the error of each node(back propagate)
+def calcErrors(outputs):
     # Calculate the error in the output layer
     for mNode in mNN.outNodes:
         print("hhi");
 
 
-def sigmoid(x):
-    return 1/(1 + np.exp(-x));
 
-
-
+# Calculate the forward values of each node
 def calcNNOutput(inputs):
-    output = [];
 
     # Add the bias value at the front of the array
     inputs = np.insert(inputs, 0, biasValue);
@@ -71,6 +73,7 @@ def calcNNOutput(inputs):
 def preProcess():
     global nInputNodes,nHiddenNodes,nOutNodes;
     global initialFile, trainFile, outputFile;
+    global learningRate, epoch;
     global mNN;
 
     # initialFile = input("Enter the name of the intial neural network:");
@@ -78,6 +81,8 @@ def preProcess():
     # trainFile = input("Enter the name of the training set:");
     trainFile = "wdbc.train.txt";
     outputFile = input("Enter the name of the output file:");
+    # learningRate = input("Enter the learning rate:");
+    # epoch = input("Enter the epoch:");
 
     # Open initial File and set values to the NNs;
     fd = open(initialFile);
@@ -115,15 +120,17 @@ def trainNetWork():
 
     lines = fd.readlines();
 
-    for nLine in range(1, len(lines)):
-        tempDatas = np.array(lines[nLine].split(" "));
-        tempDatas = tempDatas.astype(np.float);
+    for e in range(epoch):
+        for nLine in range(1, len(lines)):
+            tempDatas = np.array(lines[nLine].split(" "));
+            tempDatas = tempDatas.astype(np.float);
 
-        # Minus one to account for the bias value
-        tempInput = tempDatas[:nInputNodes-1];
+            # Minus one to account for the bias value
+            tempInputs = tempDatas[:nInputNodes-1];
+            tempOutput = tempDatas[nInputNodes-1:];
 
-        # Forward propagate to calculate the output value
-        calcNNOutput(tempInput);
+            # Forward propagate to calculate the output value
+            calcNNOutput(tempInputs);
   
 
 if __name__ == "__main__":
