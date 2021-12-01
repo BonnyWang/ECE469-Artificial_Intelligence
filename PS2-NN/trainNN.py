@@ -16,17 +16,21 @@ biasValue = -1;
 class node:
     edgeInWeights = [];
     value = 0;
+    error = 0;
 
 class NNetwork:
-    inNodes = [];
+    # inNodes = [];
     hiddenNodes = [];
     outNodes = [];
   
 mNN = NNetwork();
 
 
-def backPropagation():
-    print("Start back");
+def backPropagate():
+    # Calculate the error in the output layer
+    for mNode in mNN.outNodes:
+        print("hhi");
+
 
 def sigmoid(x):
     return 1/(1 + np.exp(-x));
@@ -63,10 +67,6 @@ def calcNNOutput(inputs):
     print("calcOutputs Finished");
 
     
-    
-
-
-
 # Get the file names and initilize the network
 def preProcess():
     global nInputNodes,nHiddenNodes,nOutNodes;
@@ -122,7 +122,8 @@ def trainNetWork():
         # Minus one to account for the bias value
         tempInput = tempDatas[:nInputNodes-1];
 
-        resultOutput = calcNNOutput(tempInput);
+        # Forward propagate to calculate the output value
+        calcNNOutput(tempInput);
   
 
 if __name__ == "__main__":
