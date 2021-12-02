@@ -9,7 +9,7 @@ nHiddenNodes = 0;
 initialFile = "";
 trainFile = "";
 outputFile = "";
-learningRate = 0.1;
+learningRate = 0.05;
 epoch = 0;
 
 biasValue = -1;
@@ -101,12 +101,12 @@ def preProcess():
     global mNN;
 
     # initialFile = input("Enter the name of the intial neural network:");
-    initialFile = "sample.NNWDBC.init.txt";
+    initialFile = "sample.NNGrades.init.txt";
     # trainFile = input("Enter the name of the training set:");
-    trainFile = "wdbc.train.txt";
+    trainFile = "grades.train.txt";
     outputFile = input("Enter the name of the output file:");
     # learningRate = input("Enter the learning rate:");
-    learningRate = 0.1;
+    learningRate = 0.05;
     # epoch = input("Enter the epoch:");
     epoch = 100;
 
