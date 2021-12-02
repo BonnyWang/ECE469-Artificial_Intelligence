@@ -161,8 +161,38 @@ def trainNetWork():
             calcNNOutput(tempInputs);
             calcErrors(tempOutputs);
             updateWeights(tempInputs);
+    
+    fd.close();
+
+def outputNetwork():
+    fd = open(outputFile, "w");
+
+    firstLine = str(nInputNodes-1) + " " + str(nHiddenNodes-1) + " " + str(nOutNodes);
+    fd.write(firstLine);
+
+    for mNode in mNN.hiddenNodes:
+        
+        weightsLine = "";
+        
+        for weight in mNode.edgeInWeights:
+            weightsLine += str(weight) + " ";
+
+        weightsLine = weightsLine.strip();
+        fd.write(weightsLine);
+
+    for mNode in mNN.outNodes:
+
+        weightsLine = "";
+        
+        for weight in mNode.edgeInWeights:
+            weightsLine += str(weight) + " ";
+
+        weightsLine = weightsLine.strip();
+        fd.write(weightsLine);
+
   
 
 if __name__ == "__main__":
     preProcess();
     trainNetWork();
+    outputNetwork();
