@@ -46,6 +46,7 @@ def updateWeights(inputs):
         for w in range(len(mNode.edgeInWeights)):
             mNode.edgeInWeights[w] = mNode.edgeInWeights[w] + learningRate*inputs[w]*mNode.error;
     
+    
 
 # Calculate the error of each node(back propagate)
 def calcErrors(outputs):
@@ -61,10 +62,11 @@ def calcErrors(outputs):
         mNode = mNN.hiddenNodes[i];
         for j in range(nOutNodes):
             tempOutNode = mNN.outNodes[j]
-            sum = tempOutNode.error*tempOutNode.edgeInWeights[i];
+            sum += tempOutNode.error*tempOutNode.edgeInWeights[i];
         
         mNode.error = sum*mNode.value*(1-mNode.value);
     
+
 
 
 # Calculate the forward values of each node
