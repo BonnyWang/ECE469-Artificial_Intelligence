@@ -40,11 +40,12 @@ def updateWeights(inputs):
 
     # Update the weight from the input nodes to the hidden nodes
     for mNode in mNN.hiddenNodes:
+        # Skip the bias node
+        if mNode == mNN.hiddenNodes[0]:
+            continue;
         for w in range(len(mNode.edgeInWeights)):
             mNode.edgeInWeights[w] = mNode.edgeInWeights[w] + learningRate*inputs[w]*mNode.error;
     
-    print("Weights update complete")
-
 
 # Calculate the error of each node(back propagate)
 def calcErrors(outputs):
@@ -60,18 +61,14 @@ def calcErrors(outputs):
         mNode = mNN.hiddenNodes[i];
         for j in range(nOutNodes):
             tempOutNode = mNN.outNodes[j]
-            sum = tempOutNode.error*tempOutNode.edgeInWeights;
+            sum = tempOutNode.error*tempOutNode.edgeInWeights[i];
         
         mNode.error = sum*mNode.value*(1-mNode.value);
     
-    print("Error calculated complete")
 
 
 # Calculate the forward values of each node
 def calcNNOutput(inputs):
-
-    # Add the bias value at the front of the array
-    inputs = np.insert(inputs, 0, biasValue);
 
     # Calculate the values of the Hidden Nodes
     for mNode in mNN.hiddenNodes:
@@ -94,7 +91,6 @@ def calcNNOutput(inputs):
         
         mNode.value = sigmoid(sum);
     
-    print("calcOutputs Finished");
 
     
 # Get the file names and initilize the network
@@ -110,7 +106,9 @@ def preProcess():
     trainFile = "wdbc.train.txt";
     outputFile = input("Enter the name of the output file:");
     # learningRate = input("Enter the learning rate:");
+    learningRate = 0.1;
     # epoch = input("Enter the epoch:");
+    epoch = 100;
 
     # Open initial File and set values to the NNs;
     fd = open(initialFile);
@@ -157,6 +155,9 @@ def trainNetWork():
             tempInputs = tempDatas[:nInputNodes-1];
             tempOutputs = tempDatas[nInputNodes-1:];
 
+            # Adde the bias value
+            tempInputs = np.insert(tempInputs, 0, biasValue);
+
             # Back Propagation process
             calcNNOutput(tempInputs);
             calcErrors(tempOutputs);
@@ -168,27 +169,31 @@ def outputNetwork():
     fd = open(outputFile, "w");
 
     firstLine = str(nInputNodes-1) + " " + str(nHiddenNodes-1) + " " + str(nOutNodes);
-    fd.write(firstLine);
+    fd.write(firstLine + "\n");
 
     for mNode in mNN.hiddenNodes:
+
+        # Skip the bias node in the hidden nodes
+        if mNode == mNN.hiddenNodes[0]:
+            continue;
         
         weightsLine = "";
         
         for weight in mNode.edgeInWeights:
-            weightsLine += str(weight) + " ";
+            weightsLine += format(np.round(weight,3),'.3f') + " ";
 
         weightsLine = weightsLine.strip();
-        fd.write(weightsLine);
+        fd.write(weightsLine + "\n");
 
     for mNode in mNN.outNodes:
 
         weightsLine = "";
         
         for weight in mNode.edgeInWeights:
-            weightsLine += str(weight) + " ";
+            weightsLine += format(np.round(weight,3),'.3f') + " ";
 
         weightsLine = weightsLine.strip();
-        fd.write(weightsLine);
+        fd.write(weightsLine + "\n");
 
   
 
