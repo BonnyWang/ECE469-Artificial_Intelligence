@@ -30,13 +30,41 @@ mNN = NNetwork();
 def sigmoid(x):
     return 1/(1 + np.exp(-x));
 
+# Updates all the weights based on the errors
+def updateWeights(inputs):
+
+    # Update the weight from the hidden nodes to the output nodes
+    for mNode in mNN.outNodes:
+        for w in range(len(mNode.edgeInWeights)):
+            mNode.edgeInWeights[w] = mNode.edgeInWeights[w] + learningRate*mNN.hiddenNodes[w].value*mNode.error;
+
+    # Update the weight from the input nodes to the hidden nodes
+    for mNode in mNN.hiddenNodes:
+        for w in range(len(mNode.edgeInWeights)):
+            mNode.edgeInWeights[w] = mNode.edgeInWeights[w] + learningRate*inputs[w]*mNode.error;
+    
+    print("Weights update complete")
+
 
 # Calculate the error of each node(back propagate)
 def calcErrors(outputs):
+   
     # Calculate the error in the output layer
-    for mNode in mNN.outNodes:
-        print("hhi");
+    for i in range(nOutNodes):
+        mNode = mNN.outNodes[i];
+        mNode.error = (outputs[i] - mNode.value)*mNode.value*(1-mNode.value);  
 
+    # Calculate the error in the hidden layer
+    for i in range(nHiddenNodes):
+        sum = 0;
+        mNode = mNN.hiddenNodes[i];
+        for j in range(nOutNodes):
+            tempOutNode = mNN.outNodes[j]
+            sum = tempOutNode.error*tempOutNode.edgeInWeights;
+        
+        mNode.error = sum*mNode.value*(1-mNode.value);
+    
+    print("Error calculated complete")
 
 
 # Calculate the forward values of each node
@@ -127,10 +155,12 @@ def trainNetWork():
 
             # Minus one to account for the bias value
             tempInputs = tempDatas[:nInputNodes-1];
-            tempOutput = tempDatas[nInputNodes-1:];
+            tempOutputs = tempDatas[nInputNodes-1:];
 
-            # Forward propagate to calculate the output value
+            # Back Propagation process
             calcNNOutput(tempInputs);
+            calcErrors(tempOutputs);
+            updateWeights(tempInputs);
   
 
 if __name__ == "__main__":
