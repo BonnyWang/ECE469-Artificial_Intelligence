@@ -1,20 +1,5 @@
 import numpy as np
-from numpy.core.records import recarray;
-from trainNN import NNetwork, node, sigmoid;
-
-
-mNN = NNetwork();
-
-# Initalize variables
-nInputNodes = 0;
-nOutNodes = 0;
-nHiddenNodes = 0;
-
-nnFile = "";
-testFile = "";
-resultFile = "";
-
-biasValue = -1;
+from trainNN import NNetwork, calcNNOutput, initNN, biasValue;
 
 def roundUp(output):
     if output >= 0.5:
@@ -39,36 +24,11 @@ def decideABCD(expected, predicted):
 def mformat(number):
     return format(np.round(number,3),'.3f');
 
-def calcNNOutput(inputs):
 
-    # Calculate the values of the Hidden Nodes
-    for mNode in mNN.hiddenNodes:
-        sum = 0;
-
-        # Account for the bias node
-        if(mNode == mNN.hiddenNodes[0]):
-            mNode.value = biasValue;
-            continue;
-        
-        for nEdge in range(0,nInputNodes):
-            sum += inputs[nEdge]*mNode.edgeInWeights[nEdge];
-        mNode.value =  sigmoid(sum);
-
-    # Calculate teh values of each Output value
-    for mNode in mNN.outNodes:
-        sum = 0;
-        for nEdge in range(0,nHiddenNodes):
-            sum += mNN.hiddenNodes[nEdge].value*mNode.edgeInWeights[nEdge];
-        
-        mNode.value = sigmoid(sum);
-    
-    return mNN;
-
-def testNN():
-    global mNN;
+def testNN(mNN, testFile, resultFile):
 
     # [output classes][A,B,C,D]
-    counts = [[0]*4 for i in range(nOutNodes)];    
+    counts = [[0]*4 for i in range(mNN.nOutNodes)];    
     
     fd = open(testFile);
     lines = fd.readlines();
@@ -78,17 +38,17 @@ def testNN():
         tempDatas = tempDatas.astype(np.float);
 
         # Minus one to account for the bias value
-        tempInputs = tempDatas[:nInputNodes-1];
-        tempOutputs = tempDatas[nInputNodes-1:];
+        mNN.inputs = tempDatas[:mNN.nInputNodes-1];
+        tempOutputs = tempDatas[mNN.nInputNodes-1:];
 
         # Adde the bias value
-        tempInputs = np.insert(tempInputs, 0, biasValue);
+        mNN.inputs = np.insert(mNN.inputs, 0, biasValue);
 
         # Back Propagation process
-        calcNNOutput(tempInputs);
+        calcNNOutput(mNN);
 
         # Round Up all the results and calculate all the A B C D value for each class
-        for n in range(nOutNodes):
+        for n in range(mNN.nOutNodes):
             mNN.outNodes[n].value = roundUp(mNN.outNodes[n].value);
             case = decideABCD(tempOutputs[n],mNN.outNodes[n].value);
             counts[n][case] += 1;
@@ -109,7 +69,7 @@ def testNN():
     sumRecall = 0;
     sumF1 = 0;
 
-    for n in range(nOutNodes):
+    for n in range(mNN.nOutNodes):
         A = counts[n][0];
         B = counts[n][1];
         C = counts[n][2];
@@ -145,9 +105,9 @@ def testNN():
     fd.write(outputLine);
 
     # Calc for macro averaging
-    macroAccuracy = sumAccuracy/nOutNodes;
-    macroPrecission = sumPrecision/nOutNodes;
-    macroRecall = sumRecall/nOutNodes;
+    macroAccuracy = sumAccuracy/mNN.nOutNodes;
+    macroPrecission = sumPrecision/mNN.nOutNodes;
+    macroRecall = sumRecall/mNN.nOutNodes;
     macroF1 = (2*macroPrecission*macroRecall)/(macroPrecission + macroRecall);
     outputLine = mformat(macroAccuracy) + " " + mformat(macroPrecission) + " " + mformat(macroRecall) + " " + mformat(macroF1) + "\n";
     fd.write(outputLine);
@@ -155,48 +115,21 @@ def testNN():
         
 
 def preProcess():
-    global nnFile, testFile, resultFile;
-    global nInputNodes,nHiddenNodes,nOutNodes;
-    global mNN;
 
     nnFile = input("Please enter the name of the Neural Network file:");
     testFile = input("Please enter the name of the test file:");
     resultFile = input("Please enter the name of the result file:");
 
-    # nnFile = "mgraderesult.txt";
+    # nnFile = "mgradestrained.txt";
     # testFile = "grades.test.txt";
     # resultFile = "mtestresult.txt";
 
-    fd = open(nnFile);
-    lines = fd.readlines();
-
-    nInputNodes = int(lines[0].split(" ")[0])+1;
-    # Plus one to add the bias node
-    nHiddenNodes = int(lines[0].split()[1])+1;
-    nOutNodes = int(lines[0].split()[2]);
-
-    # Add the hidden bias node to the NN
-    mHiddenBiasNode = node();
-    mHiddenBiasNode.edgeInWeights = np.zeros(nInputNodes);  
-    mNN.hiddenNodes.append(mHiddenBiasNode);
-
-    for nLine in range(1, nHiddenNodes):
-        tempHiddenNode = node();
-        tempWeights = np.array(lines[nLine].split(" "));
-
-        tempHiddenNode.edgeInWeights = tempWeights.astype(np.float);
-        mNN.hiddenNodes.append(tempHiddenNode);
-    
-    for nLine in range(nHiddenNodes, len(lines)):
-        tempOutNode = node();
-        tempWeights = np.array(lines[nLine].split(" "));
-
-        tempOutNode.edgeInWeights = tempWeights.astype(np.float);
-        mNN.outNodes.append(tempOutNode);
-
-    fd.close();
-
+    return nnFile,testFile,resultFile;
     
 if __name__ == "__main__":
-    preProcess();
-    testNN();
+
+    mNN = NNetwork();
+    
+    nnFile,testFile,resultFile = preProcess();
+    initNN(nnFile,mNN);
+    testNN(mNN,testFile,resultFile);
