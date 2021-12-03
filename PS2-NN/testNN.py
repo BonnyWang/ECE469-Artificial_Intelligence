@@ -120,10 +120,6 @@ def preProcess():
     testFile = input("Please enter the name of the test file:");
     resultFile = input("Please enter the name of the result file:");
 
-    # nnFile = "mgradestrained.txt";
-    # testFile = "grades.test.txt";
-    # resultFile = "mtestresult.txt";
-
     return nnFile,testFile,resultFile;
     
 if __name__ == "__main__":
