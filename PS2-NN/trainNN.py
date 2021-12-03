@@ -102,15 +102,15 @@ def preProcess():
     global learningRate, epoch;
     global mNN;
 
-    # initialFile = input("Enter the name of the intial neural network:");
-    initialFile = "sample.NNGrades.init.txt";
-    # trainFile = input("Enter the name of the training set:");
-    trainFile = "grades.train.txt";
+    initialFile = input("Enter the name of the intial neural network:");
+    # initialFile = "sample.NNGrades.init.txt";
+    trainFile = input("Enter the name of the training set:");
+    # trainFile = "grades.train.txt";
     outputFile = input("Enter the name of the output file:");
-    # learningRate = input("Enter the learning rate:");
-    learningRate = 0.05;
-    # epoch = input("Enter the epoch:");
-    epoch = 100;
+    learningRate = float(input("Enter the learning rate:"));
+    # learningRate = 0.05;
+    epoch = int(input("Enter the epoch:"));
+    # epoch = 100;
 
     # Open initial File and set values to the NNs;
     fd = open(initialFile);

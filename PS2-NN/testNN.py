@@ -159,13 +159,13 @@ def preProcess():
     global nInputNodes,nHiddenNodes,nOutNodes;
     global mNN;
 
-    # nnFile = input("Please enter the name of the Neural Network file:");
-    # testFile = input("Please enter the name of the test file:");
-    # resultFile = input("Please enter the name of the result file:");
+    nnFile = input("Please enter the name of the Neural Network file:");
+    testFile = input("Please enter the name of the test file:");
+    resultFile = input("Please enter the name of the result file:");
 
-    nnFile = "mgraderesult.txt";
-    testFile = "grades.test.txt";
-    resultFile = "mtestresult.txt";
+    # nnFile = "mgraderesult.txt";
+    # testFile = "grades.test.txt";
+    # resultFile = "mtestresult.txt";
 
     fd = open(nnFile);
     lines = fd.readlines();
