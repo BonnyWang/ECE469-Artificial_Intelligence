@@ -100,8 +100,8 @@ def generateDatas():
         for i in range(0,8):
             outputLine += str(testValue[i]) + " ";
         
-        # Add outputs to the outputline 
-        for i in range(0,8):
+        # Add 2 outputs to the outputline 
+        for i in range(2):
             if i == personality:
                 outputLine += "1 ";
             else:
@@ -116,7 +116,7 @@ def generateDatas():
     
 def splitTrainTest():
     fd = open("surveyDataset.dat");
-    fdtrain = open("surveryTrain.dat","w");
+    fdtrain = open("surveyTrain.dat","w");
     fdtest = open("surveyTest.dat", "w");
 
     fileToWrite = fdtrain;
@@ -151,7 +151,7 @@ def createInitFile():
         outline = outline.strip() + "\n";
         fd.write(outline);
 
-    for i in range(8):
+    for i in range(2):
         outline = ""
         for j in range(5):
             weight = random.uniform(0, 1);
@@ -163,8 +163,8 @@ def createInitFile():
 
 
 # testTotalValue();
-# generateDatas();
-# splitTrainTest();
+generateDatas();
+splitTrainTest();
 createInitFile();
 
 
