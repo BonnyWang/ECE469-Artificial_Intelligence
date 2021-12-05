@@ -81,9 +81,16 @@ def testNN(mNN, testFile, resultFile):
         globalD += D;
 
         OverallAccuracy = (A + D)/( A + B + C + D);
-        Precision = A/(A + B);
+        if A + B == 0:
+            Precision = 0;
+        else:
+            Precision = A/(A + B);
         Recall = A/(A + C);
-        F1 = (2*Precision*Recall)/(Precision + Recall);
+
+        if Precision + Recall == 0:
+            F1 = 0; 
+        else:
+            F1 = (2*Precision*Recall)/(Precision + Recall);
 
         sumAccuracy += OverallAccuracy;
         sumPrecision += Precision;

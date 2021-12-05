@@ -82,7 +82,7 @@ def generateDatas():
 
     fd = open("surveyDataset.dat", "w");
 
-    for i in range(0,10000):
+    for i in range(0,2000):
 
         # Initialize values
         result =[0]*8;
@@ -98,10 +98,10 @@ def generateDatas():
 
         # Adding inputs to the outputline;
         for i in range(0,8):
-            outputLine += str(testValue[i]) + " ";
+            outputLine += mformat(testValue[i]/3) + " ";
         
         # Add 2 outputs to the outputline 
-        for i in range(2):
+        for i in range(8):
             if i == personality:
                 outputLine += "1 ";
             else:
@@ -123,8 +123,11 @@ def splitTrainTest():
 
     lines = fd.readlines();
 
+    fdtrain.write("1000 8 8\n")
+    fdtest.write("1000 8 8\n")
+
     for line in lines:
-        if line == lines[8000]:
+        if line == lines[1000]:
             fileToWrite = fdtest;
         
         fileToWrite.write(line);
@@ -139,9 +142,9 @@ def mformat(number):
 def createInitFile():
     fd = open("surveyInit.dat", "w");
 
+    fd.write("8 32 8\n")
 
-
-    for i in range(4):
+    for i in range(32):
         
         outline = ""
         for j in range(9):
@@ -151,9 +154,9 @@ def createInitFile():
         outline = outline.strip() + "\n";
         fd.write(outline);
 
-    for i in range(2):
+    for i in range(8):
         outline = ""
-        for j in range(5):
+        for j in range(33):
             weight = random.uniform(0, 1);
             outline += mformat(weight) + " ";
         
@@ -165,7 +168,7 @@ def createInitFile():
 # testTotalValue();
 generateDatas();
 splitTrainTest();
-createInitFile();
+# createInitFile();
 
 
 
