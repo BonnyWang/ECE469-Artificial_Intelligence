@@ -115,9 +115,9 @@ def generateDatas():
 
     
 def splitTrainTest():
-    fd = open("surveyDataset.dat");
-    fdtrain = open("surveyTrain.dat","w");
-    fdtest = open("surveyTest.dat", "w");
+    fd = open("surveyDataset.txt");
+    fdtrain = open("surveyTrain.txt","w");
+    fdtest = open("surveyTest.txt", "w");
 
     fileToWrite = fdtrain;
 
@@ -140,7 +140,7 @@ def mformat(number):
     return format(np.round(number,3),'.3f');
 
 def createInitFile():
-    fd = open("surveyInit.dat", "w");
+    fd = open("surveyInit.txt", "w");
 
     fd.write("8 32 8\n")
 
@@ -168,14 +168,4 @@ def createInitFile():
 # testTotalValue();
 generateDatas();
 splitTrainTest();
-# createInitFile();
-
-
-
-
-
-
-     
-     
-
-     
+# createInitFile();     
